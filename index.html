@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant Imaging Rig</title>
+<meta name="description" content="Latest frame from a turntable plant-growth imaging rig.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+<style>
+  :root {
+    --bg: #f6f5f3;
+    --panel: #ffffff;
+    --ink: #1c1b19;
+    --muted: #6b6862;
+    --line: #e2ded8;
+    --accent: #4a7c59;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16151a;
+      --panel: #1e1d23;
+      --ink: #ececef;
+      --muted: #9b98a3;
+      --line: #2e2c35;
+      --accent: #7fb287;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 2rem 1.25rem 3rem;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+
+  header { margin-bottom: 1.5rem; }
+  h1 {
+    margin: 0 0 .3rem;
+    font-size: clamp(1.4rem, 3.2vw, 2rem);
+    font-weight: 620;
+    letter-spacing: -0.02em;
+  }
+  .sub { margin: 0; color: var(--muted); font-size: .95rem; max-width: 60ch; }
+
+  .frame {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .shot { display: block; width: 100%; height: auto; background: var(--line); }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 2rem;
+    padding: .95rem 1.15rem;
+    border-top: 1px solid var(--line);
+    font-size: .88rem;
+  }
+  .meta div { display: flex; gap: .45rem; align-items: baseline; }
+  .k { color: var(--muted); }
+  .v { font-variant-numeric: tabular-nums; font-weight: 560; }
+
+  .live {
+    display: inline-flex; align-items: center; gap: .45rem;
+    color: var(--accent); font-weight: 600;
+  }
+  .dot {
+    width: .5rem; height: .5rem; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none } }
+
+  footer { margin-top: 1.5rem; color: var(--muted); font-size: .84rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Plant Imaging Rig</h1>
+    <p class="sub">
+      A single fixed camera photographs a plant on a motorised turntable. The platter
+      indexes 15&deg; every five minutes, so 24 viewing angles complete a full revolution
+      every two hours. This is the most recent frame.
+    </p>
+  </header>
+
+  <div class="frame">
+    <img id="shot" class="shot" src="latest.jpg" alt="Most recent frame from the imaging rig">
+    <div class="meta">
+      <div><span class="live"><span class="dot"></span>Live</span></div>
+      <div><span class="k">Captured</span><span class="v" id="captured">&mdash;</span></div>
+      <div><span class="k">Angle</span><span class="v" id="angle">&mdash;</span></div>
+      <div><span class="k">Revolution</span><span class="v" id="cycle">&mdash;</span></div>
+      <div><span class="k">Camera</span><span class="v" id="camera">&mdash;</span></div>
+    </div>
+  </div>
+
+  <footer>
+    Refreshes automatically. Source on
+    <a href="https://github.com/llama-with-thumbs/plant_imaging_rig">GitHub</a>.
+  </footer>
+</div>
+
+<script>
+  const REFRESH_MS = 60000;
+
+  function ago(iso) {
+    const then = new Date(iso);
+    if (isNaN(then)) return iso;
+    const secs = Math.max(0, (Date.now() - then) / 1000);
+    if (secs < 90) return Math.round(secs) + "s ago";
+    if (secs < 5400) return Math.round(secs / 60) + " min ago";
+    if (secs < 172800) return Math.round(secs / 3600) + " h ago";
+    return Math.round(secs / 86400) + " days ago";
+  }
+
+  async function refresh() {
+    const bust = "?t=" + Date.now();
+    try {
+      const meta = await fetch("meta.json" + bust, { cache: "no-store" }).then(r => r.json());
+      document.getElementById("captured").textContent =
+        ago(meta.captured) + "  (" + meta.captured.replace("T", " ") + ")";
+      document.getElementById("angle").textContent =
+        meta.angle == null ? "—" : meta.angle.toFixed(1) + "°";
+      document.getElementById("cycle").textContent =
+        meta.cycle == null ? "—" : "#" + meta.cycle;
+      document.getElementById("camera").textContent = meta.camera || "—";
+      document.title = "Plant Imaging Rig — " + ago(meta.captured);
+    } catch (e) {
+      /* meta.json may not exist yet; the image alone still works */
+    }
+    document.getElementById("shot").src = "latest.jpg" + bust;
+  }
+
+  refresh();
+  setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
