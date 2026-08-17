@@ -62,11 +62,16 @@ OUTPUT_DIR = "captured_images"
 
 # --- Lighting ------------------------------------------------------------
 
-# BCM pin driving the relay's DC control terminal.  The 110 V side stays sealed
-# inside the relay box; nothing mains-side is switched by the Pi directly.
-# On boot this pin is an input with a pull-down, so the relay fails to OFF.
-LIGHT_PIN = 17
-LIGHT_ACTIVE_HIGH = True
+# BCM pin driving the relay module's IN terminal.  The lamps are 12 V DC LED
+# bars (2 x Litever 5 W, ~0.83 A total) fed by their own adapter; the relay
+# breaks the 12 V positive line, so nothing mains-side is switched here.
+#
+# BCM 4 specifically, and not any spare pin: these modules trigger on a LOW
+# input, and BCM 4 is one of the few pins that boots with a pull-UP, so it
+# idles high and the lamps stay off until software drives them.  A pull-down
+# pin such as BCM 17 would switch the lamps ON at every power-up.
+LIGHT_PIN = 4               # physical pin 7
+LIGHT_ACTIVE_HIGH = False   # relay module triggers on a LOW input
 
 # Daily on-windows in the Pi's LOCAL time, as ("HH:MM", "HH:MM") pairs.  A
 # window may cross midnight ("22:00", "06:00").  Outside these hours the lamp
