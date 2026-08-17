@@ -11,16 +11,25 @@ keeping under version control.
 MOTOR_PINS = (5, 6, 13, 26)
 
 # Half-steps for one full turn of the *platter*, including the belt reduction.
-# 4076 is the motor's own shaft only, and is certainly wrong for the platter --
-# run calibrate.py and put the measured value here.
-STEPS_PER_REV = 4076.0
+# Measured on the assembled rig: 80000 half-steps produced exactly two platter
+# revolutions.  That is a 9.81:1 reduction, which agrees with a 20-tooth GT2
+# pulley driving the ~125 mm platter rim.
+#
+# Note this does not divide evenly by 24 (1666.67 steps per stop), which is why
+# rig/motor.py derives each stop from an absolute target instead of adding a
+# rounded increment -- 24 stops still sum to exactly 40000.
+STEPS_PER_REV = 40000.0
 
 # Stops per revolution.  24 gives the 15 degree index the rig was designed for.
 STOPS = 24
 
-# Seconds per half-step.  The original script used 0.001, which is at the edge
-# of what a 28BYJ-48 will pull under belt tension; 0.002 trades speed for not
-# silently losing steps, which open-loop positioning cannot recover from.
+# Seconds per half-step.  1.5 ms ran cleanly for 450 s continuous during
+# calibration, so 2 ms keeps a margin of torque in hand for the sake of runs
+# that last weeks -- a skipped step is unrecoverable in an open loop, and one
+# index still takes only ~3.3 s.
+#
+# Belt tension matters more than speed here: over-tensioned, this rig lost
+# roughly 70% of its steps at every delay tried.
 STEP_DELAY = 0.002
 
 # Steps spent ramping in and out of each move.  0 disables ramping.
