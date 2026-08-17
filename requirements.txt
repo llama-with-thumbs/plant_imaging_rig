@@ -1,0 +1,5 @@
+# Both ship as Raspberry Pi OS system packages (python3-gpiozero, python3-lgpio)
+# and are already present on Bookworm. They are listed for completeness -- see
+# the README on why a plain venv will not see them.
+gpiozero
+lgpio
