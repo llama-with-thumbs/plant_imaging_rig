@@ -9,6 +9,8 @@ import os
 import time
 from datetime import datetime, timezone
 
+from contextlib import nullcontext
+
 import config
 from rig.capture import cameras_available, capture_still
 from rig.motor import Platter
@@ -39,6 +41,14 @@ def run():
         ramp_steps=config.RAMP_STEPS,
     )
 
+    lights = None
+    if config.LIGHTS_ENABLED:
+        from rig.lights import Lights
+        lights = Lights(pin=config.LIGHT_PIN,
+                        schedule=config.LIGHT_SCHEDULE,
+                        settle_seconds=config.LIGHT_SETTLE_SECONDS,
+                        active_high=config.LIGHT_ACTIVE_HIGH)
+
     print(f"Resuming at stop {platter.stop} "
           f"(cycle {platter.cycle}, angle {platter.angle:.1f} deg)")
 
@@ -57,8 +67,18 @@ def run():
             timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
             path = frame_path(platter.cycle, platter.angle_index, timestamp)
 
-            if capture_still(path, config.CAPTURE_WIDTH, config.CAPTURE_HEIGHT,
-                             settle_ms=config.SETTLE_MS):
+            # Bring the lamp in line with the day/night schedule, then ensure
+            # light for the exposure itself -- lit() is a no-op when the
+            # schedule already has it on, and pulses it when it does not.
+            if lights:
+                lights.apply_schedule()
+
+            with (lights.lit() if lights else nullcontext()):
+                captured = capture_still(path, config.CAPTURE_WIDTH,
+                                         config.CAPTURE_HEIGHT,
+                                         settle_ms=config.SETTLE_MS)
+
+            if captured:
                 print(f"{timestamp}  cycle {platter.cycle} "
                       f"angle {platter.angle_index:02d} ({platter.angle:6.1f} deg)  {path}")
                 if config.PUBLISH:

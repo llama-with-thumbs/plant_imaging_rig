@@ -60,6 +60,28 @@ CAPTURE_HEIGHT = 3040
 SETTLE_MS = 2000                   # exposure/white-balance settling before the shot
 OUTPUT_DIR = "captured_images"
 
+# --- Lighting ------------------------------------------------------------
+
+# BCM pin driving the relay's DC control terminal.  The 110 V side stays sealed
+# inside the relay box; nothing mains-side is switched by the Pi directly.
+# On boot this pin is an input with a pull-down, so the relay fails to OFF.
+LIGHT_PIN = 17
+LIGHT_ACTIVE_HIGH = True
+
+# Daily on-windows in the Pi's LOCAL time, as ("HH:MM", "HH:MM") pairs.  A
+# window may cross midnight ("22:00", "06:00").  Outside these hours the lamp
+# is off except for a brief pulse around each capture.
+#   python lights.py preview   to check what a change actually does
+LIGHT_SCHEDULE = [("08:00", "20:00")]
+
+# Seconds to wait after switching on before capturing in the dark.  LEDs shift
+# in brightness and colour temperature for a while after switch-on, and
+# photogrammetry is unforgiving of frames that do not match each other.
+LIGHT_SETTLE_SECONDS = 20
+
+# Set False to ignore the lamp entirely (no relay fitted yet).
+LIGHTS_ENABLED = False
+
 # --- Publishing ----------------------------------------------------------
 
 # Push each frame to the GitHub Pages site as it is captured.  Requires the
