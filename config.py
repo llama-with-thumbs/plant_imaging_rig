@@ -32,8 +32,11 @@ STATE_PATH = "state/platter.json"
 # --- Capture -------------------------------------------------------------
 
 INTERVAL_SECONDS = 5 * 60          # one stop every five minutes -> 2 h per rev
-CAPTURE_WIDTH = 2592
-CAPTURE_HEIGHT = 1944
+
+# Full native resolution of the IMX477 (Raspberry Pi HQ Camera) fitted to this
+# rig.  bio-chart's 2592x1944 belonged to an earlier, smaller sensor.
+CAPTURE_WIDTH = 4056
+CAPTURE_HEIGHT = 3040
 SETTLE_MS = 2000                   # exposure/white-balance settling before the shot
 OUTPUT_DIR = "captured_images"
 
