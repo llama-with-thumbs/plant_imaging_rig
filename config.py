@@ -60,6 +60,15 @@ CAPTURE_HEIGHT = 3040
 SETTLE_MS = 2000                   # exposure/white-balance settling before the shot
 OUTPUT_DIR = "captured_images"
 
+# --- Publishing ----------------------------------------------------------
+
+# Push each frame to the GitHub Pages site as it is captured.  Requires the
+# deploy key described in the README; leave False until that is set up, or the
+# capture loop will log a publish failure every tick.
+#
+# Note the site is PUBLIC, as is the repository serving it.
+PUBLISH = False
+
 # --- Experiment metadata -------------------------------------------------
 
 SUBJECT = "Amaryllis"

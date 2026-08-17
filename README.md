@@ -95,6 +95,56 @@ Platter position is written to `state/platter.json` after every index, so a
 restart — or a power cut — resumes at the right angle instead of silently
 starting a new revolution mid-turn.
 
+## Live site
+
+The most recent frame is published at
+**https://llama-with-thumbs.github.io/plant_imaging_rig/**
+
+It is served from an orphan `gh-pages` branch holding exactly one commit. Each
+publish amends that commit and force-pushes, so a photo updating every few
+minutes never accumulates history — the branch stays the size of one image
+instead of growing indefinitely.
+
+> **The site and the repository serving it are public.** Whatever the camera
+> can see is world-readable. Frame the shot accordingly.
+
+Publish manually, or set `PUBLISH = True` in `config.py` to have every capture
+pushed as it is taken:
+
+```bash
+python publish.py --capture        # take a fresh frame and publish it
+python publish.py                  # publish the newest existing frame
+```
+
+### One-time: giving the Pi push access
+
+The Pi clones over HTTPS, which is read-only, so publishing needs a deploy key.
+One was generated at `~/.ssh/id_ed25519_rig` on the Pi; add its public half to
+the repository with **write** access:
+
+```bash
+gh repo deploy-key add ~/.ssh/id_ed25519_rig.pub \
+    --repo llama-with-thumbs/plant_imaging_rig \
+    --title "plant-rig-pi (publish)" --allow-write
+```
+
+Then, on the Pi, point that key at a host alias so it is used only for this
+repository:
+
+```bash
+cat >> ~/.ssh/config <<'EOF'
+Host github.com-plantrig
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_rig
+  IdentitiesOnly yes
+EOF
+git config --global user.name "plant-rig-pi"
+git config --global user.email "pi@plant-imaging-rig.local"
+```
+
+`publish.py` already targets that alias.
+
 ## Notes
 
 - The coils are released between moves. Holding them draws ~200 mA and warms

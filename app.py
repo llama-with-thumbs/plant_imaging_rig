@@ -61,6 +61,14 @@ def run():
                              settle_ms=config.SETTLE_MS):
                 print(f"{timestamp}  cycle {platter.cycle} "
                       f"angle {platter.angle_index:02d} ({platter.angle:6.1f} deg)  {path}")
+                if config.PUBLISH:
+                    # Never let the website take the rig down with it: a failed
+                    # push is a website problem, not a reason to stop capturing.
+                    try:
+                        from publish import publish
+                        publish(path)
+                    except Exception as error:
+                        print(f"  publish failed (continuing): {error}")
             else:
                 # A failed frame must not desynchronise the platter from the
                 # schedule, so the index still happens.
