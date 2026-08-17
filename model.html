@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bottle Model — Plant Imaging Rig</title>
+<meta name="description" content="Interactive 3D model carved from 36 turntable photographs.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+<style>
+  :root {
+    --bg:#f6f7f3; --panel:#fff; --ink:#191d19; --muted:#5c635b;
+    --line:#dfe3da; --accent:#476b4f; --stage:#eceee7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131611; --panel:#1a1e19; --ink:#e7eae3; --muted:#949b90;
+            --line:#2a2f27; --accent:#83ac8b; --stage:#101310; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         padding:2rem 1.25rem 3rem; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  h1 { margin:0 0 .3rem; font-size:clamp(1.4rem,3.2vw,2rem); font-weight:620; letter-spacing:-.02em; }
+  .sub { margin:0 0 1.25rem; color:var(--muted); font-size:.95rem; max-width:62ch; }
+  a { color:var(--accent); }
+
+  .frame { background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .stage { position:relative; background:var(--stage); }
+  canvas { display:block; width:100%; height:min(68vh,660px); touch-action:none; cursor:grab; }
+  canvas:active { cursor:grabbing; }
+  #status { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+            font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.85rem; color:var(--muted); }
+  #status[hidden] { display:none; }
+
+  .bar { display:flex; flex-wrap:wrap; gap:.6rem 1rem; align-items:center;
+         padding:.8rem 1.1rem; border-top:1px solid var(--line); font-size:.85rem; }
+  button { font:inherit; font-size:.85rem; padding:.35rem .8rem; border:1px solid var(--line);
+           background:var(--bg); color:var(--ink); border-radius:8px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .spacer { flex:1; }
+  .stat { color:var(--muted); font-family:ui-monospace,Menlo,Consolas,monospace; }
+  .stat b { color:var(--ink); font-weight:600; }
+
+  .note { margin-top:1.25rem; border:1px solid var(--line); background:var(--panel);
+          border-radius:12px; padding:1rem 1.15rem; font-size:.9rem; color:var(--muted); }
+  .note b { color:var(--ink); }
+  .note ul { margin:.5rem 0 0; padding-left:1.1rem; }
+  .note li { margin:.25rem 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bottle Model</h1>
+  <p class="sub">Carved from 36 photographs taken 10&deg; apart on the turntable. Drag to rotate,
+    scroll to zoom, double-click to reset.</p>
+
+  <div class="frame">
+    <div class="stage">
+      <canvas id="gl"></canvas>
+      <div id="status">loading model&hellip;</div>
+    </div>
+    <div class="bar">
+      <button id="spin">Pause spin</button>
+      <button id="reset">Reset view</button>
+      <span class="spacer"></span>
+      <span class="stat" id="tris">&mdash;</span>
+      <span class="stat" id="dims">&mdash;</span>
+      <a id="dl" href="bottle.stl" download>Download STL</a>
+      <a href="models.html">All models</a>
+      <a id="ctoggle" href="?c=1">Colour</a>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>How this was made, and what it is not.</b>
+    <ul>
+      <li>The turntable angle is known to a fraction of a degree, so no feature matching was
+        needed &mdash; each photograph&rsquo;s silhouette carves away everything it rules out, and
+        what survives all 36 is the model.</li>
+      <li>A silhouette method cannot see <b>concavities</b>. The dish behind the trigger and the
+        waist under the label come out filled. That is inherent to the technique.</li>
+      <li>The camera geometry is <b>fitted, not assumed</b>: where the rotation axis falls in
+        the image, how far the camera tilts down (&minus;15.8&deg;), and how strong the
+        perspective is (a camera 431&nbsp;mm away) were each solved by carving from half the
+        views and scoring how well the result predicted the other half.</li>
+      <li>That raised agreement with the photographs from an IoU of 0.78 to 0.83. What remains
+        is mostly lens distortion, which a checkerboard calibration would remove.</li>
+    </ul>
+  </div>
+
+  <p class="sub" style="margin-top:1.25rem">
+    <a href="./">&larr; Back to the live view</a>
+  </p>
+</div>
+
+<script>
+const canvas = document.getElementById("gl");
+const statusEl = document.getElementById("status");
+const gl = canvas.getContext("webgl", { antialias: true });
+
+if (!gl) {
+  statusEl.textContent = "WebGL is not available in this browser.";
+} else {
+  main();
+}
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+
+const VS = `
+attribute vec3 aPos;
+attribute vec3 aNrm;
+attribute vec3 aCol;
+uniform mat4 uProj, uView, uModel;
+varying vec3 vN, vP, vC;
+void main() {
+  vec4 wp = uModel * vec4(aPos, 1.0);
+  vN = mat3(uModel) * aNrm;
+  vC = aCol;
+  vP = wp.xyz;
+  gl_Position = uProj * uView * wp;
+}`;
+
+const FS = `
+precision mediump float;
+varying vec3 vN, vP, vC;
+uniform vec3 uTint;
+uniform float uUseCol;
+void main() {
+  vec3 n = normalize(vN);
+  vec3 key = normalize(vec3(0.5, 0.8, 0.9));
+  vec3 fill = normalize(vec3(-0.7, 0.1, 0.4));
+  float d = max(dot(n, key), 0.0) * 0.78 + max(dot(n, fill), 0.0) * 0.22;
+  vec3 v = normalize(-vP);
+  float spec = pow(max(dot(reflect(-key, n), v), 0.0), 24.0) * 0.30;
+  float rim = pow(1.0 - max(dot(n, v), 0.0), 3.0) * 0.16;
+  // Vertex colour when the model carries it, otherwise the flat tint. Sampled
+  // colour already contains the lamps' shading, so it gets a flatter response
+  // than the untextured case -- lighting it a second time doubles the shadows.
+  vec3 base = mix(uTint, vC, uUseCol);
+  float shade = mix(0.20 + 0.85 * d, 0.55 + 0.45 * d, uUseCol);
+  vec3 col = base * shade + (spec + rim) * (1.0 - 0.7 * uUseCol);
+  gl_FragColor = vec4(pow(col, vec3(0.4545)), 1.0);
+}`;
+
+function mat4() { return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); }
+function perspective(fovy, aspect, near, far) {
+  const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
+  return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,2*far*near*nf,0]);
+}
+function multiply(a, b) {
+  const o = new Float32Array(16);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+    let s = 0; for (let k = 0; k < 4; k++) s += a[k*4+j] * b[i*4+k];
+    o[i*4+j] = s;
+  }
+  return o;
+}
+function translate(x, y, z) { const m = mat4(); m[12]=x; m[13]=y; m[14]=z; return m; }
+function rotY(t) { const c=Math.cos(t), s=Math.sin(t), m=mat4(); m[0]=c; m[2]=-s; m[8]=s; m[10]=c; return m; }
+function rotX(t) { const c=Math.cos(t), s=Math.sin(t), m=mat4(); m[5]=c; m[6]=s; m[9]=-s; m[10]=c; return m; }
+
+function parsePLY(buf) {
+  // Binary little-endian PLY with per-vertex colour, which is what the
+  // texturing step writes. Only the fields this viewer needs are read; the
+  // header is scanned rather than fully parsed, because trimesh always emits
+  // the same handful of property lines in the same order.
+  const bytes = new Uint8Array(buf);
+  let headEnd = -1;
+  const needle = "end_header
+";
+  outer: for (let i = 0; i < Math.min(bytes.length, 8192); i++) {
+    for (let k = 0; k < needle.length; k++) {
+      if (bytes[i + k] !== needle.charCodeAt(k)) continue outer;
+    }
+    headEnd = i + needle.length; break;
+  }
+  if (headEnd < 0) throw new Error("not a binary PLY");
+  const header = new TextDecoder().decode(bytes.subarray(0, headEnd));
+  const nv = parseInt(/element vertex (\d+)/.exec(header)[1], 10);
+  const nf = parseInt(/element face (\d+)/.exec(header)[1], 10);
+  const hasCol = /property uchar (red|diffuse_red)/.test(header);
+  const hasNrm = /property float nx/.test(header);
+  const stride = 12 + (hasNrm ? 12 : 0) + (hasCol ? 4 : 0);
+
+  const dv = new DataView(buf);
+  const vx = new Float32Array(nv * 3), vc = new Float32Array(nv * 3);
+  for (let i = 0; i < nv; i++) {
+    let o = headEnd + i * stride;
+    vx[i*3] = dv.getFloat32(o, true);
+    vx[i*3+1] = dv.getFloat32(o+4, true);
+    vx[i*3+2] = dv.getFloat32(o+8, true);
+    o += 12 + (hasNrm ? 12 : 0);
+    if (hasCol) {
+      vc[i*3] = dv.getUint8(o)/255; vc[i*3+1] = dv.getUint8(o+1)/255; vc[i*3+2] = dv.getUint8(o+2)/255;
+    } else { vc[i*3]=vc[i*3+1]=vc[i*3+2]=0.8; }
+  }
+  const pos = new Float32Array(nf*9), nrm = new Float32Array(nf*9), col = new Float32Array(nf*9);
+  let o = headEnd + nv * stride;
+  const lo = [1e9,1e9,1e9], hi = [-1e9,-1e9,-1e9];
+  for (let f = 0; f < nf; f++) {
+    const cnt = dv.getUint8(o); o += 1;
+    const a = dv.getInt32(o, true), b = dv.getInt32(o+4, true), c = dv.getInt32(o+8, true);
+    o += 4 * cnt;
+    const idx = [a,b,c];
+    const p = idx.map(k => [vx[k*3], vx[k*3+1], vx[k*3+2]]);
+    const u = [p[1][0]-p[0][0], p[1][1]-p[0][1], p[1][2]-p[0][2]];
+    const w = [p[2][0]-p[0][0], p[2][1]-p[0][1], p[2][2]-p[0][2]];
+    let n = [u[1]*w[2]-u[2]*w[1], u[2]*w[0]-u[0]*w[2], u[0]*w[1]-u[1]*w[0]];
+    const L = Math.hypot(n[0],n[1],n[2]) || 1; n = [n[0]/L, n[1]/L, n[2]/L];
+    for (let j = 0; j < 3; j++) {
+      const k = idx[j], t = f*9 + j*3;
+      pos[t]=vx[k*3]; pos[t+1]=vx[k*3+1]; pos[t+2]=vx[k*3+2];
+      nrm[t]=n[0]; nrm[t+1]=n[1]; nrm[t+2]=n[2];
+      col[t]=vc[k*3]; col[t+1]=vc[k*3+1]; col[t+2]=vc[k*3+2];
+      for (let d2 = 0; d2 < 3; d2++) {
+        lo[d2] = Math.min(lo[d2], pos[t+d2]); hi[d2] = Math.max(hi[d2], pos[t+d2]);
+      }
+    }
+  }
+  return { pos, nrm, col, count: nf, lo, hi, coloured: hasCol };
+}
+
+function parseSTL(buf) {
+  const dv = new DataView(buf);
+  const n = dv.getUint32(80, true);
+  if (84 + n * 50 !== buf.byteLength) throw new Error("not a binary STL");
+  const pos = new Float32Array(n * 9), nrm = new Float32Array(n * 9);
+  let o = 84;
+  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < n; i++) {
+    const nx = dv.getFloat32(o, true), ny = dv.getFloat32(o+4, true), nz = dv.getFloat32(o+8, true);
+    o += 12;
+    for (let k = 0; k < 3; k++) {
+      const x = dv.getFloat32(o, true), y = dv.getFloat32(o+4, true), z = dv.getFloat32(o+8, true);
+      o += 12;
+      const j = (i*3+k)*3;
+      pos[j]=x; pos[j+1]=y; pos[j+2]=z;
+      nrm[j]=nx; nrm[j+1]=ny; nrm[j+2]=nz;
+      if (x<lo[0]) lo[0]=x; if (y<lo[1]) lo[1]=y; if (z<lo[2]) lo[2]=z;
+      if (x>hi[0]) hi[0]=x; if (y>hi[1]) hi[1]=y; if (z>hi[2]) hi[2]=z;
+    }
+    o += 2;
+  }
+  return { pos, nrm, count: n, lo, hi };
+}
+
+async function main() {
+  let mesh;
+  try {
+    // ?m=<key> picks one of the published attempts; no parameter is the current best
+    const q = new URLSearchParams(location.search);
+    const key = q.get("m");
+    // ?c=1 asks for the coloured version, which is a PLY carrying vertex colour
+    const src = key && /^[A-Za-z0-9_.-]+$/.test(key) ? "models/" + key + ".stl"
+              : (q.get("c") ? "bottle_colour.ply" : "bottle.stl");
+    document.getElementById("dl").href = src;
+    const res = await fetch(src, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const ab = await res.arrayBuffer();
+    try {
+      mesh = src.endsWith(".ply") ? parsePLY(ab) : parseSTL(ab);
+    } catch (pe) {
+      throw new Error("could not read " + src + " -- " + pe.message);
+    }
+  } catch (e) {
+    statusEl.textContent = "Could not load the model (" + e.message + ").";
+    return;
+  }
+  statusEl.hidden = true;
+
+  const size = [mesh.hi[0]-mesh.lo[0], mesh.hi[1]-mesh.lo[1], mesh.hi[2]-mesh.lo[2]];
+  const centre = [(mesh.hi[0]+mesh.lo[0])/2, (mesh.hi[1]+mesh.lo[1])/2, (mesh.hi[2]+mesh.lo[2])/2];
+  const radius = Math.max(size[0], size[1], size[2]) / 2;
+  document.getElementById("tris").innerHTML = "<b>" + mesh.count.toLocaleString() + "</b> triangles";
+  document.getElementById("dims").innerHTML =
+    "<b>" + size.map(v => v.toFixed(0)).join(" &times; ") + "</b> mm";
+
+  // Everything below used to run outside any try/catch, so a shader that failed
+  // to compile threw into nothing and the page sat on "loading model" forever --
+  // indistinguishable from a missing file. Whatever goes wrong now says so.
+  let prog;
+  try {
+    prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      throw new Error("link: " + gl.getProgramInfoLog(prog));
+    }
+    gl.useProgram(prog);
+  } catch (e) {
+    statusEl.hidden = false;
+    statusEl.textContent = "Shader problem: " + e.message;
+    return;
+  }
+
+  const pb = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, pb);
+  gl.bufferData(gl.ARRAY_BUFFER, mesh.pos, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, "aPos");
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0);
+
+  const nb = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, nb);
+  gl.bufferData(gl.ARRAY_BUFFER, mesh.nrm, gl.STATIC_DRAW);
+  const aNrm = gl.getAttribLocation(prog, "aNrm");
+  gl.enableVertexAttribArray(aNrm);
+  gl.vertexAttribPointer(aNrm, 3, gl.FLOAT, false, 0, 0);
+
+  const cb = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, cb);
+  gl.bufferData(gl.ARRAY_BUFFER, mesh.col || new Float32Array(mesh.count*9), gl.STATIC_DRAW);
+  const aCol = gl.getAttribLocation(prog, "aCol");
+  if (aCol >= 0) {                     // -1 when the compiler drops it
+    gl.enableVertexAttribArray(aCol);
+    gl.vertexAttribPointer(aCol, 3, gl.FLOAT, false, 0, 0);
+  }
+
+  gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.BACK);
+
+  const uUse = gl.getUniformLocation(prog, "uUseCol");
+  if (uUse) gl.uniform1f(uUse, mesh.coloured ? 1.0 : 0.0);
+  const uProj = gl.getUniformLocation(prog, "uProj");
+  const uView = gl.getUniformLocation(prog, "uView");
+  const uModel = gl.getUniformLocation(prog, "uModel");
+  gl.uniform3f(gl.getUniformLocation(prog, "uTint"), 0.30, 0.42, 0.86);
+
+  const HOME = { yaw: 0.6, pitch: -0.18, dist: radius * 3.4 };
+  let yaw = HOME.yaw, pitch = HOME.pitch, dist = HOME.dist, spinning = true;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      canvas.width = w * dpr; canvas.height = h * dpr;
+    }
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+
+  let dragging = false, lx = 0, ly = 0;
+  canvas.addEventListener("pointerdown", e => {
+    dragging = true; lx = e.clientX; ly = e.clientY;
+    canvas.setPointerCapture(e.pointerId); spinning = false; syncSpin();
+  });
+  canvas.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    yaw += (e.clientX - lx) * 0.008;
+    pitch = Math.max(-1.4, Math.min(1.4, pitch + (e.clientY - ly) * 0.008));
+    lx = e.clientX; ly = e.clientY;
+  });
+  canvas.addEventListener("pointerup", e => { dragging = false; canvas.releasePointerCapture(e.pointerId); });
+  canvas.addEventListener("wheel", e => {
+    e.preventDefault();
+    dist = Math.max(radius * 1.4, Math.min(radius * 9, dist * (1 + Math.sign(e.deltaY) * 0.12)));
+  }, { passive: false });
+  canvas.addEventListener("dblclick", reset);
+
+  function reset() { yaw = HOME.yaw; pitch = HOME.pitch; dist = HOME.dist; }
+  document.getElementById("reset").addEventListener("click", reset);
+  const spinBtn = document.getElementById("spin");
+  function syncSpin() { spinBtn.textContent = spinning ? "Pause spin" : "Resume spin"; }
+  spinBtn.addEventListener("click", () => { spinning = !spinning; syncSpin(); });
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) { spinning = false; syncSpin(); }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.1); last = now;
+    if (spinning) yaw += dt * 0.45;
+    resize();
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    const proj = perspective(0.72, canvas.width / canvas.height, radius * 0.05, radius * 40);
+    const view = multiply(translate(0, 0, -dist), multiply(rotX(pitch), rotY(yaw)));
+    const model = translate(-centre[0], -centre[1], -centre[2]);
+    gl.uniformMatrix4fv(uProj, false, proj);
+    gl.uniformMatrix4fv(uView, false, view);
+    gl.uniformMatrix4fv(uModel, false, model);
+    gl.drawArrays(gl.TRIANGLES, 0, mesh.count * 3);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
