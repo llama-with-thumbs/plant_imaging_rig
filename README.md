@@ -103,5 +103,15 @@ starting a new revolution mid-turn.
 - `STEP_DELAY` is 2 ms rather than the 1 ms used in early testing. A 28BYJ-48
   is marginal at 1 ms under belt tension, and because positioning is open loop
   a skipped step is a permanent error that nothing downstream can detect.
+- **The rig indexes in one direction only, and it matters.** 24 forward indexes
+  finished 45° short of a full revolution — 12.5% of steps lost — while 24
+  reverse indexes returned to the mark exactly. Both directions execute
+  identically in software (verified: 1667/1666 alternating, summing to 40000),
+  so the asymmetry is mechanical, most likely unequal wrap angle over the two
+  spring idlers. `config.DIRECTION` selects the direction that holds position.
+- **Belt tension is the dominant variable.** Over-tensioned, this rig lost
+  roughly 70% of its commanded steps at every step delay tried; no software
+  setting compensated. If positions start drifting, check tension before
+  touching `STEP_DELAY`.
 - There is no homing switch. Position is only ever relative to wherever the
   platter was when `state/platter.json` was created.

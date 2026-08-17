@@ -66,7 +66,7 @@ def run():
                 # schedule, so the index still happens.
                 print(f"{timestamp}  capture failed at angle {platter.angle_index:02d}")
 
-            platter.index()
+            platter.index(config.DIRECTION)
             tick += 1
 
 

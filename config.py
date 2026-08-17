@@ -23,6 +23,17 @@ STEPS_PER_REV = 40000.0
 # Stops per revolution.  24 gives the 15 degree index the rig was designed for.
 STOPS = 24
 
+# Which way the platter indexes.  The two directions are NOT equivalent on this
+# rig: 24 forward indexes finished 45 degrees short of a full turn (12.5% of
+# steps lost to belt slip), while 24 reverse indexes returned to the mark
+# exactly.  A torque shortfall would have cost both directions equally, so the
+# asymmetry is in the drive -- most likely unequal wrap angle over the two
+# spring idlers, giving less grip one way round.
+#
+# Rotation direction is arbitrary for photogrammetry, so index the way that
+# holds position.  Revisit if the idler geometry is ever made symmetric.
+DIRECTION = -1
+
 # Seconds per half-step.  1.5 ms ran cleanly for 450 s continuous during
 # calibration, so 2 ms keeps a margin of torque in hand for the sake of runs
 # that last weeks -- a skipped step is unrecoverable in an open loop, and one

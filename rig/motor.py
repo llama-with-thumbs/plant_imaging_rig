@@ -80,8 +80,13 @@ class Platter:
 
     @property
     def cycle(self):
-        """How many complete revolutions have been made."""
-        return self.stop // self.stops
+        """How many complete revolutions have been made.
+
+        Counted by magnitude so that indexing backwards -- which is how this
+        rig runs, see config.DIRECTION -- still numbers its cycles 0, 1, 2
+        rather than 0, -1, -2 and its output directories with them.
+        """
+        return abs(self.stop) // self.stops
 
     @property
     def angle_index(self):
