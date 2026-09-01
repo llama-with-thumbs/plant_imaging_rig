@@ -62,16 +62,20 @@ OUTPUT_DIR = "captured_images"
 
 # --- Lighting ------------------------------------------------------------
 
-# BCM pin driving the relay module's IN terminal.  The lamps are 12 V DC LED
-# bars (2 x Litever 5 W, ~0.83 A total) fed by their own adapter; the relay
-# breaks the 12 V positive line, so nothing mains-side is switched here.
+# BCM pin driving the relay module's S (signal) terminal.  The lamps are 12 V
+# DC LED bars (2 x Litever 5 W, ~0.83 A total) fed by their own adapter; the
+# relay breaks the 12 V positive line, so nothing mains-side is switched here.
 #
-# BCM 4 specifically, and not any spare pin: these modules trigger on a LOW
-# input, and BCM 4 is one of the few pins that boots with a pull-UP, so it
-# idles high and the lamps stay off until software drives them.  A pull-down
-# pin such as BCM 17 would switch the lamps ON at every power-up.
-LIGHT_PIN = 4               # physical pin 7
-LIGHT_ACTIVE_HIGH = False   # relay module triggers on a LOW input
+# The fitted module (Inland/SONGLE SRD-05VDC-SL-C) has no optocoupler and
+# triggers on a HIGH input -- measured, not assumed: driving BCM 17 high lit
+# the module's LED and pulled the coil in.
+#
+# BCM 17 pairs with that deliberately.  It boots as an input with a pull-DOWN,
+# so it idles low and the lamps stay dark until software drives them.  Pairing
+# an active-high module with a pull-UP pin such as BCM 4 would instead switch
+# the lamps on at every power-up.
+LIGHT_PIN = 17              # physical pin 11
+LIGHT_ACTIVE_HIGH = True    # measured: coil pulls in on a HIGH input
 
 # Daily on-windows in the Pi's LOCAL time, as ("HH:MM", "HH:MM") pairs.  A
 # window may cross midnight ("22:00", "06:00").  Outside these hours the lamp
@@ -84,8 +88,8 @@ LIGHT_SCHEDULE = [("08:00", "20:00")]
 # photogrammetry is unforgiving of frames that do not match each other.
 LIGHT_SETTLE_SECONDS = 20
 
-# Set False to ignore the lamp entirely (no relay fitted yet).
-LIGHTS_ENABLED = False
+# Set False to ignore the lamp entirely (no relay fitted).
+LIGHTS_ENABLED = True
 
 # --- Publishing ----------------------------------------------------------
 
