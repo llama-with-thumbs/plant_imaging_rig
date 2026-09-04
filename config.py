@@ -12,28 +12,23 @@ MOTOR_PINS = (5, 6, 13, 26)
 
 # Half-steps for one full turn of the *platter*, including the belt reduction.
 #
-# WARNING: this number is not currently meaningful, and no value of it would be.
-# Measured 2026-09-04 with a rigid test object photographed every 15 degrees
-# through 480 degrees of commanded rotation: the platter returned to its
-# starting pose at 450 degrees commanded, i.e. it delivers ~80% of what it is
-# told.  But the loss is not a fixed ratio -- three consecutive revolutions at
-# the corrected figure landed in three different places, differing from each
-# other by 6-7 grey levels against a 0.7 noise floor, and worsening each time.
+# Set 2026-09-04 after a seized tensioner idler was found and freed.  With the
+# idler locked, the belt had been skidding across it instead of rolling, which
+# is what produced every symptom we chased for days: ~70% step loss when
+# over-tensioned, a 12.5% loss in one direction but not the other, and a
+# scatter of ~27 degrees between supposedly identical revolutions.  None of it
+# was the motor, the driver, or the software.
 #
-# Variable slip cannot be calibrated away, because software has no way to know
-# how much was lost.  Fixing it needs positive engagement (gears or a worm
-# drive) or an encoder on the platter axis to close the loop.  Until then,
-# treat platter angle as an estimate, not a measurement.
+# With the idler free, 40000 half-steps over-rotated the platter by 15 degrees
+# (375 instead of 360), giving 40000 * 360/375 = 38400.  That divides evenly
+# into 24 stops of exactly 1600 steps, which is a good sign in itself -- the
+# earlier figures never did.
 #
-# The 40000 below came from an earlier count of "two turns per 80000 steps".
-# That was taken while the platter was not moving the pot at all, so it is
-# unreliable; it is kept only so the indexing arithmetic has something to run
-# against.
-#
-# Note it does not divide evenly by 24 (1666.67 steps per stop), which is why
-# rig/motor.py derives each stop from an absolute target instead of adding a
-# rounded increment -- 24 stops still sum to exactly 40000.
-STEPS_PER_REV = 40000.0
+# Verify after any mechanical change: mark the rim, command one revolution,
+# and check it returns.  rig/motor.py derives each stop from an absolute target
+# rather than adding a rounded increment, so 24 stops sum to exactly this
+# number even when it does not divide evenly.
+STEPS_PER_REV = 38400.0
 
 # Stops per revolution.  24 gives the 15 degree index the rig was designed for.
 STOPS = 24
