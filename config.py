@@ -11,11 +11,26 @@ keeping under version control.
 MOTOR_PINS = (5, 6, 13, 26)
 
 # Half-steps for one full turn of the *platter*, including the belt reduction.
-# Measured on the assembled rig: 80000 half-steps produced exactly two platter
-# revolutions.  That is a 9.81:1 reduction, which agrees with a 20-tooth GT2
-# pulley driving the ~125 mm platter rim.
 #
-# Note this does not divide evenly by 24 (1666.67 steps per stop), which is why
+# WARNING: this number is not currently meaningful, and no value of it would be.
+# Measured 2026-09-04 with a rigid test object photographed every 15 degrees
+# through 480 degrees of commanded rotation: the platter returned to its
+# starting pose at 450 degrees commanded, i.e. it delivers ~80% of what it is
+# told.  But the loss is not a fixed ratio -- three consecutive revolutions at
+# the corrected figure landed in three different places, differing from each
+# other by 6-7 grey levels against a 0.7 noise floor, and worsening each time.
+#
+# Variable slip cannot be calibrated away, because software has no way to know
+# how much was lost.  Fixing it needs positive engagement (gears or a worm
+# drive) or an encoder on the platter axis to close the loop.  Until then,
+# treat platter angle as an estimate, not a measurement.
+#
+# The 40000 below came from an earlier count of "two turns per 80000 steps".
+# That was taken while the platter was not moving the pot at all, so it is
+# unreliable; it is kept only so the indexing arithmetic has something to run
+# against.
+#
+# Note it does not divide evenly by 24 (1666.67 steps per stop), which is why
 # rig/motor.py derives each stop from an absolute target instead of adding a
 # rounded increment -- 24 stops still sum to exactly 40000.
 STEPS_PER_REV = 40000.0
