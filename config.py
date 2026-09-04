@@ -28,33 +28,33 @@ MOTOR_PINS = (5, 6, 13, 26)
 # and check it returns.  rig/motor.py derives each stop from an absolute target
 # rather than adding a rounded increment, so 24 stops sum to exactly this
 # number even when it does not divide evenly.
-STEPS_PER_REV = 38400.0
+# Refined 2026-09-04: at 38400 the platter ran 4.5 deg short per revolution
+# (45 deg cumulative over ten), so 38400 * 360/355.5 = 38886.
+STEPS_PER_REV = 38886.0
 
 # Stops per revolution.  24 gives the 15 degree index the rig was designed for.
 STOPS = 24
 
-# Which way the platter indexes.  The two directions are NOT equivalent on this
-# rig: 24 forward indexes finished 45 degrees short of a full turn (12.5% of
-# steps lost to belt slip), while 24 reverse indexes returned to the mark
-# exactly.  A torque shortfall would have cost both directions equally, so the
-# asymmetry is in the drive -- most likely unequal wrap angle over the two
-# spring idlers, giving less grip one way round.
+# Which way the platter indexes.  Rotation direction is arbitrary for
+# photogrammetry, so this is free to choose.
 #
-# Rotation direction is arbitrary for photogrammetry, so index the way that
-# holds position.  Revisit if the idler geometry is ever made symmetric.
+# It was originally set from an apparent asymmetry -- forward losing 45 degrees
+# per revolution while reverse seemed exact.  That was the seized idler, which
+# dragged differently in each direction; both readings were artefacts of it and
+# neither should be trusted.  Worth re-testing forward now that the fault is
+# fixed, though there is no reason to expect a difference any more.
 DIRECTION = -1
 
-# Seconds per half-step.  1.5 ms ran cleanly for 450 s continuous during
-# calibration, so 2 ms keeps a margin of torque in hand for the sake of runs
-# that last weeks -- a skipped step is unrecoverable in an open loop, and one
-# index still takes only ~3.3 s.
+# Seconds per half-step.  1.5 ms ran cleanly for 450 s continuous even while
+# the tensioner idler was still seized, so with that fault fixed it has margin
+# to spare, and a revolution takes 58 s rather than 78 s.
 #
-# Belt tension matters more than speed here: over-tensioned, this rig lost
-# roughly 70% of its steps at every delay tried.
-STEP_DELAY = 0.002
+# Faster is probably available now, but only raise it alongside a repeatability
+# run: a skipped step is unrecoverable in an open loop.
+STEP_DELAY = 0.0015
 
 # Steps spent ramping in and out of each move.  0 disables ramping.
-RAMP_STEPS = 24
+RAMP_STEPS = 48
 
 # Where the platter position is remembered between runs.
 STATE_PATH = "state/platter.json"
