@@ -30,7 +30,17 @@ MOTOR_PINS = (5, 6, 13, 26)
 # number even when it does not divide evenly.
 # Refined 2026-09-04: at 38400 the platter ran 4.5 deg short per revolution
 # (45 deg cumulative over ten), so 38400 * 360/355.5 = 38886.
-STEPS_PER_REV = 38886.0
+#
+# Refined again 2026-09-06, this time instrumented rather than eyeballed.  A USB
+# camera watches a ruler on the platter rim, and cross-correlating that strip
+# between frames measures displacement to a fraction of a pixel.  Calibrating
+# against known 2-degree steps gave 5.271 px/deg, so the +17 px of drift over
+# ten revolutions is 0.322 deg per revolution of OVER-rotation:
+#   38886 * 360/360.322 = 38851
+#
+# 0.322 deg/rev sounds negligible but accumulates: at one orbit per hour it is
+# ~8 deg a day, ~54 deg a week, which would ruin a long run.
+STEPS_PER_REV = 38851.0
 
 # Stops per revolution.  24 gives the 15 degree index the rig was designed for.
 STOPS = 24
