@@ -98,6 +98,15 @@ LIGHT_SCHEDULE = [("08:00", "20:00")]
 # photogrammetry is unforgiving of frames that do not match each other.
 LIGHT_SETTLE_SECONDS = 20
 
+# --- Position readout -----------------------------------------------------
+
+# A second, USB camera watches a ruler sticker on the platter rim, giving a
+# direct reading of where the platter actually stopped rather than an inference
+# from how much the subject changed.  Max resolution on this camera is 1280x960.
+USB_DEVICE = "/dev/video2"
+USB_WIDTH = 1280
+USB_HEIGHT = 960
+
 # Set False to ignore the lamp entirely (no relay fitted).
 LIGHTS_ENABLED = True
 

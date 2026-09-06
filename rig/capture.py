@@ -26,6 +26,33 @@ def cameras_available():
     return result.returncode == 0 and "no cameras available" not in result.stdout.lower()
 
 
+def capture_usb(image_path, device="/dev/video2", width=1280, height=960,
+                skip_frames=12, timeout=30):
+    """Capture from the USB webcam, which watches the ruler on the platter rim.
+
+    This is the rig's position readout: the CSI camera photographs the subject,
+    this one photographs a scale attached to the turntable, so platter angle can
+    be read directly rather than inferred from how much the subject changed.
+
+    skip_frames discards the first frames of the stream -- a UVC webcam opens
+    with its auto exposure wide open and takes a moment to settle, and the first
+    frame is usually unreadable.
+    """
+    directory = os.path.dirname(image_path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
+    command = ["fswebcam", "-d", device, "-r", f"{width}x{height}",
+               "--no-banner", "-S", str(skip_frames), image_path]
+    try:
+        subprocess.run(command, check=True, capture_output=True, timeout=timeout)
+    except (OSError, subprocess.SubprocessError) as error:
+        detail = getattr(error, "stderr", b"") or b""
+        print(f"USB capture failed: {detail.decode(errors='replace').strip() or error}")
+        return None
+    return image_path
+
+
 def capture_still(image_path, width=None, height=None, settle_ms=2000,
                   extra_args=None, timeout=60):
     """Capture one frame to image_path.  Returns the path, or None on failure.
