@@ -79,7 +79,7 @@ INTERVAL_SECONDS = 5 * 60          # one stop every five minutes -> 2 h per rev
 # edges: x 1472..2482, y 1325..2795 of the 4056x3040 frame, plus a small margin.
 #
 # As fractions of the frame, "x,y,w,h":
-CROP_ROI = "0.355,0.424,0.265,0.516"
+CROP_ROI = "0.3540,0.3671,0.2643,0.5507"
 
 # Forcing the full sensor mode matters whenever CROP_ROI is set: asked for a
 # small output the camera otherwise selects the binned 2028x1520 mode and
@@ -89,8 +89,8 @@ SENSOR_MODE = "4056:3040:12:P"
 # Output size of the cropped frame, matching the ROI 1:1 so no scaling happens.
 # rpicam-still rejects odd numbers, hence 1076 rather than the measured 1075.
 # Files land at ~280 KB instead of 1.7 MB, which matters over weeks of capture.
-CAPTURE_WIDTH = 1076
-CAPTURE_HEIGHT = 1570
+CAPTURE_WIDTH = 1072
+CAPTURE_HEIGHT = 1674
 SETTLE_MS = 2000                   # exposure/white-balance settling before the shot
 OUTPUT_DIR = "captured_images"
 

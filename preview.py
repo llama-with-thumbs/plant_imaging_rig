@@ -24,10 +24,11 @@ import time
 
 import config
 from publish import publish
-from rig.capture import capture_still
+from rig.capture import capture_still, capture_usb
 
 SITE = "https://llama-with-thumbs.github.io/plant_imaging_rig/"
 TEMP_FRAME = "/tmp/plant_rig_preview.jpg"
+TEMP_RULER = "/tmp/plant_rig_preview_ruler.jpg"
 
 
 def shoot_and_publish():
@@ -37,8 +38,11 @@ def shoot_and_publish():
     if not frame:
         print("  capture failed")
         return False
+    ruler = capture_usb(TEMP_RULER, device=config.USB_DEVICE,
+                        width=config.USB_WIDTH, height=config.USB_HEIGHT,
+                        skip_frames=25, crop=config.USB_CROP)
     try:
-        meta = publish(frame)
+        meta = publish(frame, ruler)
     except Exception as error:
         # A failed push is a website problem; keep previewing regardless.
         print(f"  publish failed: {error}")

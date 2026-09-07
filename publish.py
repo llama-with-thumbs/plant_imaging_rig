@@ -28,6 +28,8 @@ BRANCH = "gh-pages"
 # Full frames are ~1.8 MB; the site wants something a browser can load over a
 # phone connection, and detail beyond this is not visible on a web page anyway.
 WEB_MAX_EDGE = 1800
+# The ruler strip is a readout, not a photograph -- it only has to be legible.
+RULER_MAX_EDGE = 900
 WEB_QUALITY = 82
 
 
@@ -67,7 +69,8 @@ def platter_state():
         return {}
 
 
-def publish(source_image):
+def publish(source_image, ruler_image=None):
+    """Push a frame to the site.  ruler_image, if given, goes alongside it."""
     ensure_clone()
 
     # Start from the published commit rather than whatever is lying around, so
@@ -80,6 +83,12 @@ def publish(source_image):
     image.save(os.path.join(PAGES_DIR, "latest.jpg"),
                quality=WEB_QUALITY, optimize=True)
 
+    if ruler_image and os.path.exists(ruler_image):
+        scale = Image.open(ruler_image)
+        scale.thumbnail((RULER_MAX_EDGE, RULER_MAX_EDGE), Image.LANCZOS)
+        scale.save(os.path.join(PAGES_DIR, "ruler.jpg"),
+                   quality=WEB_QUALITY, optimize=True)
+
     state = platter_state()
     meta = {
         "captured": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -89,6 +98,7 @@ def publish(source_image):
         "cycle": abs(state.get("stop", 0)) // config.STOPS if state else None,
         "camera": f"IMX477 ({config.CAPTURE_WIDTH}x{config.CAPTURE_HEIGHT})",
         "source": os.path.basename(source_image),
+        "has_ruler": bool(ruler_image and os.path.exists(ruler_image)),
     }
     with open(os.path.join(PAGES_DIR, "meta.json"), "w") as handle:
         json.dump(meta, handle, indent=2)
@@ -130,6 +140,11 @@ def main():
                                        config.CAPTURE_WIDTH, config.CAPTURE_HEIGHT,
                                        settle_ms=config.SETTLE_MS,
                                        roi=config.CROP_ROI, mode=config.SENSOR_MODE)
+                from rig.capture import capture_usb
+                ruler = capture_usb("/tmp/plant_rig_ruler.jpg",
+                                    device=config.USB_DEVICE,
+                                    width=config.USB_WIDTH, height=config.USB_HEIGHT,
+                                    skip_frames=25, crop=config.USB_CROP)
         finally:
             if lights:
                 lights.apply_schedule()
@@ -137,11 +152,12 @@ def main():
         if not source:
             raise SystemExit("Capture failed; nothing published.")
     else:
+        ruler = None
         source = args.image or newest_capture(config.OUTPUT_DIR)
         if not source:
             raise SystemExit(f"No frames found under {config.OUTPUT_DIR}.")
 
-    meta = publish(source)
+    meta = publish(source, ruler)
     print(f"Published {meta['source']} at {meta['captured']}")
     print("https://llama-with-thumbs.github.io/plant_imaging_rig/")
 
