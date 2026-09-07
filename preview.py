@@ -36,7 +36,7 @@ def shoot_and_publish():
                           settle_ms=config.SETTLE_MS,
                           roi=config.CROP_ROI, mode=config.SENSOR_MODE)
     if not frame:
-        print("  capture failed")
+        print("  capture failed", flush=True)
         return False
     ruler = capture_usb(TEMP_RULER, device=config.USB_DEVICE,
                         width=config.USB_WIDTH, height=config.USB_HEIGHT,
@@ -45,9 +45,9 @@ def shoot_and_publish():
         meta = publish(frame, ruler)
     except Exception as error:
         # A failed push is a website problem; keep previewing regardless.
-        print(f"  publish failed: {error}")
+        print(f"  publish failed: {error}", flush=True)
         return False
-    print(f"  published {meta['captured']}")
+    print(f"  published {meta['captured']}", flush=True)
     return True
 
 
@@ -68,22 +68,22 @@ def main():
                         settle_seconds=config.LIGHT_SETTLE_SECONDS,
                         active_high=config.LIGHT_ACTIVE_HIGH)
         lights.on()
-        print(f"lamp on, settling {config.LIGHT_SETTLE_SECONDS}s")
+        print(f"lamp on, settling {config.LIGHT_SETTLE_SECONDS}s", flush=True)
         time.sleep(config.LIGHT_SETTLE_SECONDS)
 
-    print(SITE)
-    print("Ctrl-C to stop\n")
+    print(SITE, flush=True)
+    print("Ctrl-C to stop\n", flush=True)
     try:
         n = 0
         while True:
             n += 1
-            print(f"frame {n}")
+            print(f"frame {n}", flush=True)
             shoot_and_publish()
             if args.once:
                 break
             time.sleep(args.interval)
     except KeyboardInterrupt:
-        print("\nstopped")
+        print("\nstopped", flush=True)
     finally:
         if lights:
             # Hand the lamp back to the schedule rather than leaving it forced on.
