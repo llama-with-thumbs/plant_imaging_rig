@@ -27,7 +27,7 @@ def cameras_available():
 
 
 def capture_usb(image_path, device="/dev/video2", width=1280, height=960,
-                skip_frames=12, timeout=30):
+                skip_frames=12, crop=None, timeout=30):
     """Capture from the USB webcam, which watches the ruler on the platter rim.
 
     This is the rig's position readout: the CSI camera photographs the subject,
@@ -37,6 +37,10 @@ def capture_usb(image_path, device="/dev/video2", width=1280, height=960,
     skip_frames discards the first frames of the stream -- a UVC webcam opens
     with its auto exposure wide open and takes a moment to settle, and the first
     frame is usually unreadable.
+
+    crop is (x0, y0, x1, y1) in fractions of the frame, trimming to the scale
+    itself.  Unlike the CSI camera there is no in-pipeline ROI here, so this
+    happens afterwards -- cheap enough on a 1.2 MP frame.
     """
     directory = os.path.dirname(image_path)
     if directory:
@@ -50,6 +54,15 @@ def capture_usb(image_path, device="/dev/video2", width=1280, height=960,
         detail = getattr(error, "stderr", b"") or b""
         print(f"USB capture failed: {detail.decode(errors='replace').strip() or error}")
         return None
+
+    if crop:
+        from PIL import Image
+        image = Image.open(image_path)
+        w, h = image.size
+        x0, y0, x1, y1 = crop
+        image.crop((int(x0 * w), int(y0 * h), int(x1 * w), int(y1 * h))).save(
+            image_path, quality=92)
+
     return image_path
 
 

@@ -131,6 +131,15 @@ USB_DEVICE = "/dev/video2"
 USB_WIDTH = 1280
 USB_HEIGHT = 960
 
+# Trim to the scale itself, as fractions (x0, y0, x1, y1).  Measured from the
+# sticker's own edges -- it is a bright, near-neutral label against darker warm
+# cork, so thresholding on brightness and low saturation finds it: x 371..981,
+# y 542..811 of the 1280x960 frame, plus a small margin.
+#
+# This camera has no in-pipeline ROI the way rpicam-still does, so the crop is
+# applied afterwards; cheap enough on a 1.2 MP frame.
+USB_CROP = (0.280, 0.552, 0.776, 0.857)
+
 # Set False to ignore the lamp entirely (no relay fitted).
 LIGHTS_ENABLED = True
 
