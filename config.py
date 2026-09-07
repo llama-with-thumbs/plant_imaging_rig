@@ -141,7 +141,7 @@ LIGHTS_ENABLED = True
 # capture loop will log a publish failure every tick.
 #
 # Note the site is PUBLIC, as is the repository serving it.
-PUBLISH = False
+PUBLISH = True
 
 # --- Experiment metadata -------------------------------------------------
 

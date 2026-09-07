@@ -84,7 +84,9 @@ def publish(source_image):
     meta = {
         "captured": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "angle": state.get("angle"),
-        "cycle": state.get("stop", 0) // config.STOPS if state else None,
+        # abs(), matching Platter.cycle: the rig indexes backwards, and a
+        # cycle numbered -2 on the page helps nobody.
+        "cycle": abs(state.get("stop", 0)) // config.STOPS if state else None,
         "camera": f"IMX477 ({config.CAPTURE_WIDTH}x{config.CAPTURE_HEIGHT})",
         "source": os.path.basename(source_image),
     }

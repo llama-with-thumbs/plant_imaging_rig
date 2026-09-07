@@ -108,13 +108,29 @@ instead of growing indefinitely.
 > **The site and the repository serving it are public.** Whatever the camera
 > can see is world-readable. Frame the shot accordingly.
 
-Publish manually, or set `PUBLISH = True` in `config.py` to have every capture
-pushed as it is taken:
+`PUBLISH = True` in `config.py` pushes every capture as it is taken. You can
+also drive it by hand:
 
 ```bash
 python publish.py --capture        # take a fresh frame and publish it
 python publish.py                  # publish the newest existing frame
 ```
+
+### Setting the rig up: preview mode
+
+For aiming the camera, moving the backdrop, or repositioning the subject, run
+`preview.py`. It shoots and publishes on a loop without rotating anything, so
+you can adjust the rig and watch the result rather than guessing:
+
+```bash
+python preview.py                  # every 45 s until Ctrl-C
+python preview.py --interval 90    # slower, for a long session
+python preview.py --once           # a single frame
+```
+
+Allow about a minute between the shutter and the page changing — the push is
+quick but GitHub Pages takes its time rebuilding. The page also re-fetches by
+itself every 60 s.
 
 ### One-time: giving the Pi push access
 
