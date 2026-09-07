@@ -69,14 +69,23 @@ if __name__ == "__main__":
 
     # Voxel indices -> a right-handed, upright, millimetre model.
     # Axis 0 and 2 are the turntable plane, axis 1 is image rows (downwards).
+    #
+    # Voxels are not cubes.  Converting indices straight to millimetres treats
+    # them as though they were and stretches the model across by the ratio of
+    # the two voxel sizes -- which on this grid is about 1.5x.
+    import json
+    g = json.load(open(os.path.join(HERE, "geometry.json")))
+    px_xz = g["px_per_voxel_xz"]
+    px_y = g["px_per_voxel_y"]
+    mm_per_px = OBJECT_HEIGHT_MM / g["object_height_px"]
+    print("voxel %.2f x %.2f px;  %.4f mm/px" % (px_xz, px_y, mm_per_px))
+
     v = verts.copy()
-    height_px_axis = np.ptp(v[:, 1])
-    mm = OBJECT_HEIGHT_MM / height_px_axis
-    xs = (v[:, 0] - v[:, 0].mean()) * mm
-    ys = (np.ptp(v[:, 1]) - (v[:, 1] - v[:, 1].min())) * mm   # flip: row 0 is the top
-    zs = (v[:, 2] - v[:, 2].mean()) * mm
+    xs = (v[:, 0] - v[:, 0].mean()) * px_xz * mm_per_px
+    ys = (np.ptp(v[:, 1]) - (v[:, 1] - v[:, 1].min())) * px_y * mm_per_px  # row 0 is the top
+    zs = (v[:, 2] - v[:, 2].mean()) * px_xz * mm_per_px
     pts = np.column_stack([xs, ys, zs])
-    pts[:, 1] -= pts[:, 1].min()                              # sit on Z=0 plane
+    pts[:, 1] -= pts[:, 1].min()                              # sit on the Z=0 plane
 
     tris = pts[faces]
     out = os.path.join(HERE, "bottle.stl")
@@ -87,8 +96,8 @@ if __name__ == "__main__":
     bb = pts.max(axis=0) - pts.min(axis=0)
     print("bounding box: %.1f x %.1f x %.1f mm  (assuming height = %.0f mm)"
           % (bb[0], bb[1], bb[2], OBJECT_HEIGHT_MM))
-    print("volume of hull: ~%.0f cm3" % (vol.sum() * (mm ** 3) *
-          (np.ptp(verts[:, 1]) / max(vol.shape[1], 1)) ** 0 / 1000))
+    voxel_mm3 = (px_xz * mm_per_px) ** 2 * (px_y * mm_per_px)
+    print("hull volume: ~%.0f cm3" % (vol.sum() * voxel_mm3 / 1000.0))
 
     np.save(os.path.join(HERE, "mesh_pts.npy"), pts.astype(np.float32))
     np.save(os.path.join(HERE, "mesh_faces.npy"), faces.astype(np.int32))

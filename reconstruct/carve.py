@@ -115,6 +115,22 @@ if __name__ == "__main__":
 
     np.save(os.path.join(HERE, "hull_voxels.npy"), vol)
 
+    # Voxels are NOT cubes: the grid spans +/-radius across but the whole object
+    # height vertically, so a voxel is (2*radius/GRID_XZ) px wide and
+    # (height/GRID_Y) px tall.  Anything that turns voxels back into real
+    # dimensions has to know both, or the model comes out stretched.
+    import json
+    json.dump({
+        "axis": axis, "top": int(top), "bottom": int(bottom), "radius": radius,
+        "grid_xz": GRID_XZ, "grid_y": GRID_Y,
+        "px_per_voxel_xz": (2 * radius) / (GRID_XZ - 1),
+        "px_per_voxel_y": (bottom - top) / (GRID_Y - 1),
+        "object_height_px": int(bottom - top),
+    }, open(os.path.join(HERE, "geometry.json"), "w"), indent=2)
+    print("voxel size: %.2f px across, %.2f px tall (ratio %.2f)"
+          % ((2 * radius) / (GRID_XZ - 1), (bottom - top) / (GRID_Y - 1),
+             ((bottom - top) / (GRID_Y - 1)) / ((2 * radius) / (GRID_XZ - 1))))
+
     # Pad so marching cubes closes the surface at the grid boundary.
     padded = np.pad(vol.astype(np.float32), 1)
     verts, faces, normals, _ = measure.marching_cubes(padded, level=0.5)

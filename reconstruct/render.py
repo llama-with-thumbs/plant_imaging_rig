@@ -15,6 +15,14 @@ from scipy import ndimage
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_W, OUT_H = 420, 620
 
+# px per horizontal voxel / px per vertical voxel, from carve.py
+import json as _json
+try:
+    _g = _json.load(open(os.path.join(HERE, "geometry.json")))
+    VOXEL_ASPECT = _g["px_per_voxel_xz"] / _g["px_per_voxel_y"]
+except Exception:
+    VOXEL_ASPECT = 1.0
+
 
 def surface_points(vol):
     """Voxels on the boundary -- the interior is invisible and just costs time."""
@@ -26,7 +34,9 @@ def surface_points(vol):
 
 def render(x, y, z, yaw_deg, pitch_deg=14.0):
     cx, cz = x.mean(), z.mean()
-    X, Z = x - cx, z - cz
+    # Scale the horizontal axes by the voxel aspect, or the preview is as
+    # stretched as the mesh was.
+    X, Z = (x - cx) * VOXEL_ASPECT, (z - cz) * VOXEL_ASPECT
     # Voxel index 0 is the TOP image row, so Y must be negated or the bottle
     # renders standing on its trigger.
     Y = -(y - y.mean())
