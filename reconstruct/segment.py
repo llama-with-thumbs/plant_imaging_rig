@@ -28,8 +28,10 @@ SRC = os.path.join(HERE, "orbit36")
 OUT = os.path.join(HERE, "masks")
 os.makedirs(OUT, exist_ok=True)
 
-# Row-mean brightness climbs from y=0.78 as the cork stand enters the frame.
-STAND_CUT = 0.80
+# The blue body reaches row ~1438 of 1520 (0.946), so an earlier cut at 0.80
+# was slicing 15% off the base of the bottle. Sit just below the true base;
+# a sliver of cork is far less harmful than a truncated model.
+STAND_CUT = 0.948
 
 
 def silhouette(path):

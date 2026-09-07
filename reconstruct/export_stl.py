@@ -25,7 +25,7 @@ from skimage import measure
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # ---- the one measurement that has to come from the real world --------------
-OBJECT_HEIGHT_MM = 250.0        # PLACEHOLDER: height of the object as captured
+OBJECT_HEIGHT_MM = 270.0        # measured with a tape
 # ---------------------------------------------------------------------------
 
 SMOOTH_SIGMA = 1.4
