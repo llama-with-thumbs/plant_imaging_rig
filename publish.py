@@ -114,7 +114,8 @@ def main():
         from rig.capture import capture_still
         source = capture_still("/tmp/plant_rig_publish.jpg",
                                config.CAPTURE_WIDTH, config.CAPTURE_HEIGHT,
-                               settle_ms=config.SETTLE_MS)
+                               settle_ms=config.SETTLE_MS,
+                               roi=config.CROP_ROI, mode=config.SENSOR_MODE)
         if not source:
             raise SystemExit("Capture failed; nothing published.")
     else:

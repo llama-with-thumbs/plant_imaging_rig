@@ -54,12 +54,22 @@ def capture_usb(image_path, device="/dev/video2", width=1280, height=960,
 
 
 def capture_still(image_path, width=None, height=None, settle_ms=2000,
-                  extra_args=None, timeout=60):
+                  roi=None, mode=None, extra_args=None, timeout=60):
     """Capture one frame to image_path.  Returns the path, or None on failure.
 
     settle_ms is handed to rpicam-still as its run time before the shot: the
     auto exposure and white balance need a moment to converge, and skipping it
     is what makes consecutive frames flicker in the finished timelapse.
+
+    roi crops in the camera pipeline rather than afterwards, as "x,y,w,h" in
+    fractions of the frame -- so a backdrop occupying a quarter of the view
+    yields a quarter-sized file with no cropping step and no wasted pixels.
+
+    mode forces a sensor mode such as "4056:3040:12:P".  It matters whenever roi
+    is used: asked for a small output, the camera otherwise picks a binned mode
+    and quietly halves the detail inside the crop.
+
+    Note rpicam-still rejects odd width or height.
     """
     directory = os.path.dirname(image_path)
     if directory:
@@ -68,6 +78,10 @@ def capture_still(image_path, width=None, height=None, settle_ms=2000,
     command = ["rpicam-still", "-o", image_path, "-n", "--timeout", str(settle_ms)]
     if width and height:
         command += ["--width", str(width), "--height", str(height)]
+    if roi:
+        command += ["--roi", roi]
+    if mode:
+        command += ["--mode", mode]
     if extra_args:
         command += list(extra_args)
 

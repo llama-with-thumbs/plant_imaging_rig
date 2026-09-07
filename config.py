@@ -73,10 +73,24 @@ STATE_PATH = "state/platter.json"
 
 INTERVAL_SECONDS = 5 * 60          # one stop every five minutes -> 2 h per rev
 
-# Full native resolution of the IMX477 (Raspberry Pi HQ Camera) fitted to this
-# rig.  bio-chart's 2592x1944 belonged to an earlier, smaller sensor.
-CAPTURE_WIDTH = 4056
-CAPTURE_HEIGHT = 3040
+# The subject sits against a beige backdrop occupying about a seventh of the
+# very wide lens's view, so the camera crops to it in-pipeline rather than
+# capturing 12 MP of mostly living room.  Measured from the backdrop's own
+# edges: x 1472..2482, y 1325..2795 of the 4056x3040 frame, plus a small margin.
+#
+# As fractions of the frame, "x,y,w,h":
+CROP_ROI = "0.355,0.424,0.265,0.516"
+
+# Forcing the full sensor mode matters whenever CROP_ROI is set: asked for a
+# small output the camera otherwise selects the binned 2028x1520 mode and
+# quietly halves the detail inside the crop.
+SENSOR_MODE = "4056:3040:12:P"
+
+# Output size of the cropped frame, matching the ROI 1:1 so no scaling happens.
+# rpicam-still rejects odd numbers, hence 1076 rather than the measured 1075.
+# Files land at ~280 KB instead of 1.7 MB, which matters over weeks of capture.
+CAPTURE_WIDTH = 1076
+CAPTURE_HEIGHT = 1570
 SETTLE_MS = 2000                   # exposure/white-balance settling before the shot
 OUTPUT_DIR = "captured_images"
 

@@ -76,7 +76,9 @@ def run():
             with (lights.lit() if lights else nullcontext()):
                 captured = capture_still(path, config.CAPTURE_WIDTH,
                                          config.CAPTURE_HEIGHT,
-                                         settle_ms=config.SETTLE_MS)
+                                         settle_ms=config.SETTLE_MS,
+                                         roi=config.CROP_ROI,
+                                         mode=config.SENSOR_MODE)
 
             if captured:
                 print(f"{timestamp}  cycle {platter.cycle} "
