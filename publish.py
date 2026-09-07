@@ -113,11 +113,27 @@ def main():
     args = parser.parse_args()
 
     if args.capture:
+        from contextlib import nullcontext
         from rig.capture import capture_still
-        source = capture_still("/tmp/plant_rig_publish.jpg",
-                               config.CAPTURE_WIDTH, config.CAPTURE_HEIGHT,
-                               settle_ms=config.SETTLE_MS,
-                               roi=config.CROP_ROI, mode=config.SENSOR_MODE)
+
+        # Light it. Without this the published frame is an unlit exposure of a
+        # dark room, which looks for all the world like a broken site.
+        lights = None
+        if config.LIGHTS_ENABLED:
+            from rig.lights import Lights
+            lights = Lights(pin=config.LIGHT_PIN, schedule=config.LIGHT_SCHEDULE,
+                            settle_seconds=config.LIGHT_SETTLE_SECONDS,
+                            active_high=config.LIGHT_ACTIVE_HIGH)
+        try:
+            with (lights.lit() if lights else nullcontext()):
+                source = capture_still("/tmp/plant_rig_publish.jpg",
+                                       config.CAPTURE_WIDTH, config.CAPTURE_HEIGHT,
+                                       settle_ms=config.SETTLE_MS,
+                                       roi=config.CROP_ROI, mode=config.SENSOR_MODE)
+        finally:
+            if lights:
+                lights.apply_schedule()
+                lights.close()
         if not source:
             raise SystemExit("Capture failed; nothing published.")
     else:
