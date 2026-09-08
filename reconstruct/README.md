@@ -43,8 +43,38 @@ Result on all 36 views:
 orthographic, level camera        IoU 0.7799
 + solved axis and pitch           IoU 0.8173
 + perspective                     IoU 0.8257
-+ robust voting (32 of 36)        IoU 0.8545   (+9.6% overall)
++ robust voting (32 of 36)        IoU 0.8545
++ corrected platter angles        IoU 0.8564   (+9.8% overall)
 ```
+
+## The platter does not stop where it is told
+
+The carve assumes view m was taken at exactly m x 360/36 degrees, which comes
+from counting motor steps through a belt. `refine_views.py` tests that: build
+the hull from the other 35 views, then ask which angle makes it best explain
+the held-out mask. That never uses view m's own assumed angle.
+
+The corrections come out structured rather than random -- a 1- and 2-per-rev
+sinusoid explains 66% of their variance, amplitude about 2 degrees, which is
+what eccentricity and belt error look like. Three checks, because the effect is
+small enough to be an artifact:
+
+- **dose-response** -- half the correction gives half the gain (0.8555 vs 0.8564);
+- **sign control** -- the reversed correction makes things *worse* (0.8506), so
+  this is not the score rewarding self-consistency;
+- **held out** -- fitting the curve on the 18 even views predicts the 18 odd
+  views' own measured corrections at r = 0.79, and improves them by the same
+  amount.
+
+So it is real, and worth the five parameters. But it is only +0.002 IoU against
+robust voting's +0.029, so platter indexing is a minor contributor and not the
+explanation for the residual gap.
+
+`probe_angle.py` is why the per-view corrections themselves are not applied
+directly: the objective moves about 0.001 of IoU per degree and has no sharp
+peak, so 36 free parameters slide along an almost flat surface and rail at
+whatever search bound they are given. Only the smooth 5-parameter curve is
+trustworthy.
 
 ## Don't require unanimity
 
