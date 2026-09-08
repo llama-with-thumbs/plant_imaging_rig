@@ -55,9 +55,10 @@ def write_binary_stl(path, tris):
 
 
 if __name__ == "__main__":
-    src = os.path.join(HERE, "hull_voxels_clean.npy")
+    TAG = os.environ.get("TAG", "")
+    src = os.path.join(HERE, "hull_voxels_clean%s.npy" % TAG)
     if not os.path.exists(src):
-        src = os.path.join(HERE, "hull_voxels.npy")
+        src = os.path.join(HERE, "hull_voxels%s.npy" % TAG)
     vol = np.load(src)
     vol = largest_body(vol.astype(bool))
     print("voxels: %d" % vol.sum())
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     # them as though they were and stretches the model across by the ratio of
     # the two voxel sizes -- which on this grid is about 1.5x.
     import json
-    g = json.load(open(os.path.join(HERE, "geometry.json")))
+    g = json.load(open(os.path.join(HERE, "geometry%s.json" % TAG)))
     px_xz = g["px_per_voxel_xz"]
     px_y = g["px_per_voxel_y"]
     mm_per_px = OBJECT_HEIGHT_MM / g["object_height_px"]
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     pts[:, 1] -= pts[:, 1].min()                              # sit on the Z=0 plane
 
     tris = pts[faces]
-    out = os.path.join(HERE, "bottle.stl")
+    out = os.path.join(HERE, "bottle%s.stl" % TAG)
     write_binary_stl(out, tris)
     size = os.path.getsize(out)
     print("wrote %s  (%d triangles, %.1f MB)" % (out, len(faces), size / 1e6))

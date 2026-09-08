@@ -32,7 +32,8 @@ from PIL import Image
 from skimage import measure
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-MASKS = os.path.join(HERE, "masks")
+MASKS = os.path.join(HERE, os.environ.get("MASKS_DIR", "masks"))
+TAG = os.environ.get("TAG", "")
 
 GRID_XZ = 180          # voxels across the turntable
 GRID_Y = 260           # voxels vertically
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     if filled == 0:
         raise SystemExit("nothing survived carving")
 
-    np.save(os.path.join(HERE, "hull_voxels.npy"), vol)
+    np.save(os.path.join(HERE, "hull_voxels%s.npy" % TAG), vol)
 
     # Voxels are NOT cubes: the grid spans +/-radius across but the whole object
     # height vertically, so a voxel is (2*radius/GRID_XZ) px wide and
@@ -126,7 +127,7 @@ if __name__ == "__main__":
         "px_per_voxel_xz": (2 * radius) / (GRID_XZ - 1),
         "px_per_voxel_y": (bottom - top) / (GRID_Y - 1),
         "object_height_px": int(bottom - top),
-    }, open(os.path.join(HERE, "geometry.json"), "w"), indent=2)
+    }, open(os.path.join(HERE, "geometry%s.json" % TAG), "w"), indent=2)
     print("voxel size: %.2f px across, %.2f px tall (ratio %.2f)"
           % ((2 * radius) / (GRID_XZ - 1), (bottom - top) / (GRID_Y - 1),
              ((bottom - top) / (GRID_Y - 1)) / ((2 * radius) / (GRID_XZ - 1))))
@@ -145,7 +146,7 @@ if __name__ == "__main__":
         (verts[:, 2] - 1) * sx - radius,
     ])
 
-    write_obj(os.path.join(HERE, "bottle.obj"), verts_scaled, faces)
+    write_obj(os.path.join(HERE, "bottle%s.obj" % TAG), verts_scaled, faces)
     print("mesh: %d vertices, %d triangles -> bottle.obj" % (len(verts), len(faces)))
     np.savez(os.path.join(HERE, "mesh.npz"), verts=verts_scaled, faces=faces,
              normals=normals)

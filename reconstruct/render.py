@@ -18,7 +18,8 @@ OUT_W, OUT_H = 420, 620
 # px per horizontal voxel / px per vertical voxel, from carve.py
 import json as _json
 try:
-    _g = _json.load(open(os.path.join(HERE, "geometry.json")))
+    TAG = os.environ.get("TAG", "")
+    _g = _json.load(open(os.path.join(HERE, "geometry%s.json" % TAG)))
     VOXEL_ASPECT = _g["px_per_voxel_xz"] / _g["px_per_voxel_y"]
 except Exception:
     VOXEL_ASPECT = 1.0
@@ -99,7 +100,8 @@ def render(x, y, z, yaw_deg, pitch_deg=14.0):
 
 
 if __name__ == "__main__":
-    vol = np.load(os.path.join(HERE, "hull_voxels.npy"))
+    TAG = os.environ.get("TAG", "")
+    vol = np.load(os.path.join(HERE, "hull_voxels%s.npy" % TAG))
     print("volume", vol.shape, "filled", int(vol.sum()))
     # Imperfect masks leave a few detached crumbs floating beside the object;
     # the model is the one body they are not part of.
@@ -109,7 +111,7 @@ if __name__ == "__main__":
         vol = lbl == (1 + int(np.argmax(sizes)))
         print("kept largest of %d components: %d voxels (dropped %d)"
               % (n, int(vol.sum()), n - 1))
-        np.save(os.path.join(HERE, "hull_voxels_clean.npy"), vol)
+        np.save(os.path.join(HERE, "hull_voxels_clean%s.npy" % TAG), vol)
     x, y, z = surface_points(vol)
     print("surface voxels:", x.size)
 
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     tiles = []
     for a in views:
         img = render(x, y, z, a)
-        Image.fromarray(img).save(os.path.join(HERE, "render_%03d.png" % a))
+        Image.fromarray(img).save(os.path.join(HERE, "render%s_%03d.png" % (TAG, a)))
         tiles.append((a, Image.fromarray(img)))
         print("  rendered %3d deg" % a)
 
@@ -133,5 +135,5 @@ if __name__ == "__main__":
         px, py = 10 + c * (tw + 10), 10 + r * (th + 24)
         sheet.paste(im, (px, py))
         d.text((px + 4, py + th + 6), "%d deg" % a, fill=(226, 226, 232))
-    sheet.save(os.path.join(HERE, "hull_sheet.jpg"), quality=90)
+    sheet.save(os.path.join(HERE, "hull_sheet%s.jpg" % TAG), quality=90)
     print("wrote hull_sheet.jpg", sheet.size)
