@@ -13,6 +13,7 @@ Each silhouette carves away what it rules out; what survives all 36 is the model
 python segment_green.py              # orbit36g/*.jpg -> masks_g/*.png   (chroma key)
 python solve_geom.py                 # solve rotation axis + camera pitch
 python persp.py                      # solve perspective strength
+python robust.py                     # choose the voting threshold
 python build_final.py _v3            # carve at full resolution -> hull + raw mesh
 python process_mesh.py _v3 60000     # clean, smooth, decimate -> printable STL
 python render_mesh.py bottle_v3.stl  # shaded previews, no display needed
@@ -41,8 +42,43 @@ Result on all 36 views:
 ```
 orthographic, level camera        IoU 0.7799
 + solved axis and pitch           IoU 0.8173
-+ perspective                     IoU 0.8257   (+5.9%)
++ perspective                     IoU 0.8257
++ robust voting (32 of 36)        IoU 0.8545   (+9.6% overall)
 ```
+
+## Don't require unanimity
+
+Strict carving is an intersection, so it is maximally sensitive to the worst
+mask in the set: one view clipping the object by a few pixels deletes that
+material permanently, however many other views disagree. `robust.py` counts
+votes instead and keeps voxels that enough views accept.
+
+Allowing 2 dissenters in 18 held-out views scored best (0.8349 strict -> 0.8521),
+and the same ratio on the full set -- 32 of 36 -- gives 0.8545. It also recovered
+a real topological feature the strict carve had filled in: the model comes out
+genus 1, which is correct, because a trigger sprayer has a finger loop.
+
+## How much headroom is left
+
+`ceiling.py` runs the whole pipeline on synthetic silhouettes generated
+analytically, with no camera error, no segmentation error and no lens. It
+scores **0.985-0.993**, so the metric's ceiling is ~0.99 and the real bottle's
+0.85 leaves genuine room.
+
+What the remaining gap is *not*:
+
+- **not resolution** -- a 280-cubed grid scores the same as a 180-cubed one;
+- **not lens distortion** -- fitting a radial term changes IoU by 0.001 across
+  a wide range of k1, because the crop is 980 px of a 4056 px frame taken near
+  the centre, where a fisheye is mildest;
+- **not the scoring method** -- see the ceiling above.
+
+It is **silhouette inconsistency**. Adding views keeps shrinking the hull long
+after it should plateau: from 18 to 36 views the real data loses 4.4% of its
+volume where synthetic consistent silhouettes lose 0.7%. Leave-one-out shows
+every view has 13-20% of its mask unexplained by the hull built from the other
+35, worst at the edge-on angles (100-110 and 280-310 degrees). Better masks, or
+a subject that cannot shift on the platter, is where the next real gain is.
 
 ## Notes that cost time to learn
 
