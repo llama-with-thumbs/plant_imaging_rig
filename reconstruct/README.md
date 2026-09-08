@@ -44,8 +44,37 @@ orthographic, level camera        IoU 0.7799
 + solved axis and pitch           IoU 0.8173
 + perspective                     IoU 0.8257
 + robust voting (32 of 36)        IoU 0.8545
-+ corrected platter angles        IoU 0.8564   (+9.8% overall)
++ corrected platter angles        IoU 0.8564
++ corrected principal point       IoU 0.8580   (+10.0% overall)
 ```
+
+## The principal point was wrong, and nothing else was fitted around it
+
+`CU, CV` were arithmetic, not a fit: sensor centre minus crop origin. Both terms
+were wrong. The origin used was 1080 where the ROI actually starts at 1116, and
+the 1072x1674 crop is rescaled by 0.914 down to the stored 980x1520, which was
+never applied. The correct values are **CU 541, CV 367**, not 528 and 440.
+
+This matters more than its size suggests, because the object sits about 1000 px
+below CV, so the perspective divide extrapolates a long way and any error there
+is amplified all the way down the bottle. Refitting axis, pitch and k around the
+corrected point gives pitch -14.25 and k 0.00060 (camera 323 mm), IoU 0.8580.
+
+Two traps found while getting there, both worth not repeating:
+
+- **A free CV fits better than the correct one.** Left free, it lands at 740 and
+  scores 0.8619 -- but the capture chain says 367, so 740 is pulling in the
+  *opposite* direction from the physical correction. It is absorbing a structural
+  error in the vertical projection, not measuring the principal point. Fixing it
+  properly needs a checkerboard calibration, not more fitting.
+- **A geometry can raise IoU by discarding material.** Re-solving with CV left at
+  its wrong value drove pitch to -3.5 and k to 0.00070, scoring +0.008 -- while
+  eating 11 mm off the base, because the stronger perspective throws near-side
+  base voxels below the frame. Score every candidate geometry against how much of
+  the object it keeps, not only against IoU.
+
+The bottom of the frame is where this shows first: `solve_cv.py` and
+`joint_solve.py` both carry base loss alongside the score for that reason.
 
 ## The platter does not stop where it is told
 

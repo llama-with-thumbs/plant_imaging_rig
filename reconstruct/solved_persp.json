@@ -1,0 +1,12 @@
+{
+  "axis": 522.82,
+  "pitch_deg": -14.25,
+  "k": 0.0006,
+  "iou": 0.8334267564174744,
+  "top": 47,
+  "bottom": 1439,
+  "radius": 351.85706032500997,
+  "cu": 541.0,
+  "cv": 367.0,
+  "note": "CU/CV corrected: old values used crop origin 1080 (actual 1116) and ignored the 0.914 rescale from the 1072x1674 ROI to the stored 980x1520"
+}

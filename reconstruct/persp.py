@@ -33,7 +33,9 @@ from numba import njit, prange
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-CU, CV = 528.0, 440.0          # principal point in crop coordinates
+CU, CV = 541.0, 367.0   # principal point in stored-image pixels: sensor centre
+                        # minus the ROI origin (1436, 1116), times the 0.914 rescale
+                        # from the 1072x1674 crop down to the stored 980x1520
 
 
 @njit(parallel=True, cache=True, fastmath=True)
