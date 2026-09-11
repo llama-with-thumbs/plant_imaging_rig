@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Published models &middot; Plant Imaging Rig</title>
+<style>
+  :root{
+    --bg:#11130f; --panel:#191c16; --line:#2a2e25; --line-soft:#20241c;
+    --ink:#e9ece4; --ink-2:#a8ae9e; --ink-3:#767c6d;
+    --accent:#8fbf6a; --best:#c8e08f; --bad:#d08a5a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif;padding:0 20px 80px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{padding:54px 0 4px}
+  .eyebrow{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-3);margin:0 0 14px}
+  h1{font-size:clamp(28px,5vw,40px);font-weight:600;letter-spacing:-.02em;margin:0 0 14px}
+  .lede{color:var(--ink-2);max-width:66ch;margin:0}
+  nav{margin:22px 0 0;display:flex;gap:10px;flex-wrap:wrap}
+  nav a{color:var(--ink-2);text-decoration:none;border:1px solid var(--line);
+    border-radius:3px;padding:6px 13px;font-size:13.5px}
+  nav a:hover{border-color:var(--ink-3);color:var(--ink)}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;
+    margin:34px 0 0;overflow:hidden}
+  .stat{background:var(--panel);padding:15px 18px}
+  .stat .v{font-family:"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums;
+    font-size:23px;font-weight:600;color:var(--accent)}
+  .stat .k{font-size:11.5px;color:var(--ink-3);letter-spacing:.05em;
+    text-transform:uppercase;margin-top:4px}
+  h2{font-size:12px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--ink-3);margin:46px 0 16px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;min-width:900px;font-size:13.5px}
+  th,td{text-align:left;padding:9px 14px 9px 0;border-bottom:1px solid var(--line-soft);
+    white-space:nowrap}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    border-bottom:1px solid var(--line);font-weight:600}
+  td.n,th.n{text-align:right;font-family:"Cascadia Mono",Consolas,monospace;
+    font-variant-numeric:tabular-nums}
+  td.k{font-family:"Cascadia Mono",Consolas,monospace;color:var(--ink)}
+  tr.is-best td{background:rgba(143,191,106,.07)}
+  td a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+  td a:hover{border-bottom-color:var(--accent)}
+  .dim{color:var(--ink-3)}
+  .tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    padding:2px 6px;border-radius:2px;margin-left:8px;font-weight:600}
+  .tag.best{background:var(--best);color:#1a1f12}
+  .tag.bad{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+  .legend{color:var(--ink-3);font-size:13px;margin-top:18px;max-width:78ch}
+  .legend b{color:var(--ink-2);font-weight:600}
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);
+    color:var(--ink-3);font-size:12.5px}
+</style></head><body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Plant imaging rig</p>
+  <h1>Published models</h1>
+  <p class="lede">Every reconstruction attempt, scored against the 36 photographs it was
+  built from. A new one runs automatically every half hour; failures stay on the list,
+  because knowing which directions do not work is the point of trying them.</p>
+  <nav>
+    <a href="index.html">&larr; Rig</a>
+    <a href="model.html">Current model</a>
+  </nav>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="v">{{COUNT}}</div><div class="k">attempts</div></div>
+  <div class="stat"><div class="v">{{PUBLISHED}}</div><div class="k">published</div></div>
+  <div class="stat"><div class="v">{{BEST}}</div><div class="k">best silhouette match</div></div>
+</div>
+
+<h2>Attempts, best first</h2>
+<div class="scroll">
+<table>
+  <thead><tr>
+    <th>Model</th><th class="n">Silhouette</th><th class="n">Triangles</th>
+    <th class="n">W&times;H&times;D mm</th><th class="n">H / W error</th>
+    <th class="n">Edge bulge</th><th class="n">Genus</th><th class="n">Watertight</th>
+    <th>Files</th><th>Built</th>
+  </tr></thead>
+  <tbody>
+{{ROWS}}
+  </tbody>
+</table>
+</div>
+
+<p class="legend">
+<b>Silhouette</b> is the score that matters: the finished mesh is sampled, projected
+through the measured camera into all 36 views, and compared with each photograph's own
+outline. It measures the published object, not the voxel grid it came from &mdash;
+smoothing and decimation happen after the carve and both move the outline.
+<b>H / W error</b> is against a tape: 270&nbsp;mm tall, 115&nbsp;mm at the widest.
+<b>Edge bulge</b> is how much too fat the model is seen end-on, where a turntable has
+fewest views to constrain it. <b>Genus</b> counts holes through the surface &mdash; a
+trigger sprayer really has one, so 0 or 1 is right and 24 means the mesher broke.
+Anything not watertight, or more than 8% off the tape, is rejected rather than published.
+</p>
+
+<footer>Updated {{UPDATED}}. Models are built from a single 36-frame green-screen
+capture on the rig's own Raspberry Pi.</footer>
+
+</div></body></html>

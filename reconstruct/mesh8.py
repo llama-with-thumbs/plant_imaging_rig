@@ -107,13 +107,24 @@ def build(votes, close_radius, sigma, tris, label):
     px_xz = (2 * g["radius"]) / (NXZ - 1)
     px_y = g["height_px"] / (NY - 1)
     mm = g["mm_per_px"]
-    v = verts
+
+    # Anchor the mesh to the voxel grid, not to its own extent.
+    #
+    # Centring x on the vertex centroid and measuring y from the lowest vertex
+    # loses the only two things that tie the model to the camera: the grid
+    # centre IS the rotation axis, and grid row 0 IS the top of the object. A
+    # mesh re-centred on itself cannot be projected back into the photographs,
+    # which is why the end-to-end silhouette score read 23% too fat and 14% too
+    # thin at the same time -- the shape was right and simply in the wrong place.
+    v = verts - pad                              # undo the padding offset
+    x_px = (v[:, 0] - (NXZ - 1) / 2.0) * px_xz   # 0 on the rotation axis
+    z_px = (v[:, 2] - (NXZ - 1) / 2.0) * px_xz
+    y_px = v[:, 1] * px_y                        # 0 at the top of the grid
     pts = np.column_stack([
-        (v[:, 0] - v[:, 0].mean()) * px_xz * mm,
-        (np.ptp(v[:, 1]) - (v[:, 1] - v[:, 1].min())) * px_y * mm,
-        (v[:, 2] - v[:, 2].mean()) * px_xz * mm,
+        x_px * mm,
+        (g["height_px"] - y_px) * mm,            # y measured up from the base
+        z_px * mm,
     ])
-    pts[:, 1] -= pts[:, 1].min()
 
     m = o3d.geometry.TriangleMesh(o3d.utility.Vector3dVector(pts.astype(np.float64)),
                                   o3d.utility.Vector3iVector(faces.astype(np.int32)))
