@@ -48,18 +48,28 @@ def plan():
     over the whole grid.
     """
     out = []
+    # Triangle count is held at 12000 through the sweep. The first three
+    # attempts varied only that -- 10k, 16k and 24k at identical settings --
+    # and scored 0.9039, 0.9039 and 0.9040. It does not move the silhouette at
+    # all in that range, so sweeping it alongside everything else would have
+    # spent two attempts in every three re-measuring a constant. 12000 because
+    # ties go to the lighter mesh.
     for thr in (33, 32, 34):
         for close in (1, 2, 3):
             for sigma in (1.2, 1.6, 2.0):
-                for tris in (16000, 10000, 24000):
-                    out.append(dict(kind="mesh", votes=thr, close=close,
-                                    sigma=sigma, tris=tris, nxz=260, ny=380))
+                out.append(dict(kind="mesh", votes=thr, close=close,
+                                sigma=sigma, tris=12000, nxz=260, ny=380))
     # then a finer carve, which is where genuinely new information can come from
     for thr in (33, 32):
         for close in (1, 2):
             for sigma in (1.4, 1.8):
                 out.append(dict(kind="carve", votes=thr, close=close,
-                                sigma=sigma, tris=16000, nxz=320, ny=460))
+                                sigma=sigma, tris=12000, nxz=320, ny=460))
+    # and only at the end, a triangle ladder at whatever settings won, to find
+    # where the mesh really does start to lose the shape
+    for tris in (4000, 6000, 8000, 16000, 40000):
+        out.append(dict(kind="tris", votes=33, close=2, sigma=1.6,
+                        tris=tris, nxz=260, ny=380))
     return out
 
 
