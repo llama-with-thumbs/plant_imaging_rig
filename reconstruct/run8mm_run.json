@@ -1,0 +1,228 @@
+{
+  "stops": 36,
+  "started": "2026-09-11 16:45:20",
+  "sensor_mode": "4056:3040:12:P",
+  "roi": null,
+  "steps_per_rev": 38851.0,
+  "lens": "GJ-M12-8IR 8mm, portrait mount, full frame",
+  "frames": [
+    {
+      "file": "v00.jpg",
+      "angle_deg": 0.0,
+      "ok": true,
+      "bytes": 2452664
+    },
+    {
+      "file": "v01.jpg",
+      "angle_deg": 10.0,
+      "ok": true,
+      "bytes": 2420455
+    },
+    {
+      "file": "v02.jpg",
+      "angle_deg": 20.0,
+      "ok": true,
+      "bytes": 2376643
+    },
+    {
+      "file": "v03.jpg",
+      "angle_deg": 30.0,
+      "ok": true,
+      "bytes": 2350343
+    },
+    {
+      "file": "v04.jpg",
+      "angle_deg": 40.0,
+      "ok": true,
+      "bytes": 2239104
+    },
+    {
+      "file": "v05.jpg",
+      "angle_deg": 50.0,
+      "ok": true,
+      "bytes": 2174088
+    },
+    {
+      "file": "v06.jpg",
+      "angle_deg": 60.0,
+      "ok": true,
+      "bytes": 2134477
+    },
+    {
+      "file": "v07.jpg",
+      "angle_deg": 70.0,
+      "ok": true,
+      "bytes": 2073917
+    },
+    {
+      "file": "v08.jpg",
+      "angle_deg": 80.0,
+      "ok": true,
+      "bytes": 2054491
+    },
+    {
+      "file": "v09.jpg",
+      "angle_deg": 90.0,
+      "ok": true,
+      "bytes": 2059304
+    },
+    {
+      "file": "v10.jpg",
+      "angle_deg": 100.0,
+      "ok": true,
+      "bytes": 2074222
+    },
+    {
+      "file": "v11.jpg",
+      "angle_deg": 110.0,
+      "ok": true,
+      "bytes": 2078119
+    },
+    {
+      "file": "v12.jpg",
+      "angle_deg": 120.0,
+      "ok": true,
+      "bytes": 2111919
+    },
+    {
+      "file": "v13.jpg",
+      "angle_deg": 130.0,
+      "ok": true,
+      "bytes": 2113664
+    },
+    {
+      "file": "v14.jpg",
+      "angle_deg": 140.0,
+      "ok": true,
+      "bytes": 2101990
+    },
+    {
+      "file": "v15.jpg",
+      "angle_deg": 150.0,
+      "ok": true,
+      "bytes": 2175481
+    },
+    {
+      "file": "v16.jpg",
+      "angle_deg": 160.0,
+      "ok": true,
+      "bytes": 2239950
+    },
+    {
+      "file": "v17.jpg",
+      "angle_deg": 170.0,
+      "ok": true,
+      "bytes": 2316400
+    },
+    {
+      "file": "v18.jpg",
+      "angle_deg": 180.0,
+      "ok": true,
+      "bytes": 2399052
+    },
+    {
+      "file": "v19.jpg",
+      "angle_deg": 190.0,
+      "ok": true,
+      "bytes": 2417105
+    },
+    {
+      "file": "v20.jpg",
+      "angle_deg": 200.0,
+      "ok": true,
+      "bytes": 2379112
+    },
+    {
+      "file": "v21.jpg",
+      "angle_deg": 210.0,
+      "ok": true,
+      "bytes": 2292944
+    },
+    {
+      "file": "v22.jpg",
+      "angle_deg": 220.0,
+      "ok": true,
+      "bytes": 2205820
+    },
+    {
+      "file": "v23.jpg",
+      "angle_deg": 230.0,
+      "ok": true,
+      "bytes": 2128917
+    },
+    {
+      "file": "v24.jpg",
+      "angle_deg": 240.0,
+      "ok": true,
+      "bytes": 2107838
+    },
+    {
+      "file": "v25.jpg",
+      "angle_deg": 250.0,
+      "ok": true,
+      "bytes": 2102489
+    },
+    {
+      "file": "v26.jpg",
+      "angle_deg": 260.0,
+      "ok": true,
+      "bytes": 2114867
+    },
+    {
+      "file": "v27.jpg",
+      "angle_deg": 270.0,
+      "ok": true,
+      "bytes": 2093539
+    },
+    {
+      "file": "v28.jpg",
+      "angle_deg": 280.0,
+      "ok": true,
+      "bytes": 2095901
+    },
+    {
+      "file": "v29.jpg",
+      "angle_deg": 290.0,
+      "ok": true,
+      "bytes": 2112968
+    },
+    {
+      "file": "v30.jpg",
+      "angle_deg": 300.0,
+      "ok": true,
+      "bytes": 2114773
+    },
+    {
+      "file": "v31.jpg",
+      "angle_deg": 310.0,
+      "ok": true,
+      "bytes": 2137781
+    },
+    {
+      "file": "v32.jpg",
+      "angle_deg": 320.0,
+      "ok": true,
+      "bytes": 2186827
+    },
+    {
+      "file": "v33.jpg",
+      "angle_deg": 330.0,
+      "ok": true,
+      "bytes": 2266387
+    },
+    {
+      "file": "v34.jpg",
+      "angle_deg": 340.0,
+      "ok": true,
+      "bytes": 2366948
+    },
+    {
+      "file": "v35.jpg",
+      "angle_deg": 350.0,
+      "ok": true,
+      "bytes": 2440295
+    }
+  ],
+  "elapsed_s": 279.3,
+  "ok_count": 36
+}
