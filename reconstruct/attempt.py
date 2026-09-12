@@ -101,6 +101,20 @@ def plan():
     return out
 
 
+def rank_key(r):
+    """Order attempts: silhouette, then a clean surface, then a light mesh.
+
+    Silhouette match is rounded to four decimals first, because runs that differ
+    only in an invisible decimal are the same model and should not be separated
+    by noise. Two configurations here scored an identical 0.8418 with identical
+    bounding boxes, one at genus 0 and one at genus 4 -- four tunnels through
+    the surface -- and the leaderboard preferred the punctured one on a
+    fifth-decimal lead. Surface cleanliness was the whole point of the exercise,
+    so it belongs in the ordering rather than in a column nobody sorts by.
+    """
+    return (-round(r["iou"], 4), abs(r.get("genus", 0)), r["tris"])
+
+
 def key_of(cfg):
     base = "v%d_c%d_s%.1f_t%d_%dx%d" % (cfg["votes"], cfg["close"], cfg["sigma"],
                                         cfg["tris"], cfg["nxz"], cfg["ny"])
@@ -214,10 +228,10 @@ def run(cfg):
 # ------------------------------------------------------------------ gallery
 def render_gallery(records):
     pub = [r for r in records if r.get("published")]
-    pub.sort(key=lambda r: (-r["iou"], r["tris"]))
+    pub.sort(key=rank_key)
     best = pub[0]["key"] if pub else None
     rows = []
-    for r in sorted(records, key=lambda r: (-r["iou"], r["tris"])):
+    for r in sorted(records, key=rank_key):
         badge = ""
         if r["key"] == best:
             badge = '<span class="tag best">best</span>'
@@ -247,8 +261,7 @@ def render_gallery(records):
 
 def publish(records):
     """Keep the best few on the branch so it does not grow without bound."""
-    keep = sorted([r for r in records if r["ok"]],
-                  key=lambda r: (-r["iou"], r["tris"]))[:KEEP_PUBLISHED]
+    keep = sorted([r for r in records if r["ok"]], key=rank_key)[:KEEP_PUBLISHED]
     keepset = {r["key"] for r in keep}
     for r in records:
         r["published"] = r["key"] in keepset
@@ -290,7 +303,7 @@ def main():
     records.append(rec)
     json.dump(records, open(LEDGER, "w"), indent=2)
     publish(records)
-    ranked = sorted([r for r in records if r["ok"]], key=lambda r: (-r["iou"], r["tris"]))
+    ranked = sorted([r for r in records if r["ok"]], key=rank_key)
     if ranked:
         b = ranked[0]
         print("  best so far: %s  iou %.4f  %d tris" % (b["key"], b["iou"], b["tris"]))
