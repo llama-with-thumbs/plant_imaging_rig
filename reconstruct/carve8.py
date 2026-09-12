@@ -52,6 +52,12 @@ _OBJ = json.load(open(os.path.join(HERE, "object.json")))
 OBJ_H_MM = float(_OBJ["height_mm"])
 OBJ_W_MM = float(_OBJ["width_mm"]) if _OBJ.get("width_mm") else None
 MASK_DIR = _OBJ.get("masks", "masks8")
+# How far the object's base sits above the platter. It does not change the
+# scale, but it moves the object's mid-height and therefore the camera pitch:
+# the same pot standing on the platter puts the optical axis 10.8 degrees down,
+# and on a 50 mm pedestal only 2.5 -- nearly level. Lifting the subject is a
+# camera change even though the camera did not move.
+PEDESTAL_MM = float(_OBJ.get("pedestal_mm", 0.0))
 DIST_MM, LENS_H_MM = 340.0, 140.0
 
 
@@ -86,7 +92,8 @@ def geometry(masks):
     # since height alone can be satisfied by a model of any width.
     widest = max(halfw) * 1.06
     radius_px = max((OBJ_W_MM / 2.0) / mm_per_px, widest) if OBJ_W_MM else widest
-    pitch = -math.degrees(math.atan((LENS_H_MM - OBJ_H_MM / 2.0) / DIST_MM))
+    mid_mm = PEDESTAL_MM + OBJ_H_MM / 2.0
+    pitch = -math.degrees(math.atan((LENS_H_MM - mid_mm) / DIST_MM))
     k = mm_per_px / DIST_MM                  # 1/k is the camera distance in pixels
     return dict(top=top, bottom=bottom, height_px=height_px, axis=axis,
                 radius=radius_px, mm_per_px=mm_per_px, pitch=pitch, k=k,

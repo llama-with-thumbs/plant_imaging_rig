@@ -1,8 +1,9 @@
 {
-  "name": "moka pot",
+  "name": "moka pot on pedestal",
   "height_mm": 150.0,
   "width_mm": null,
-  "masks": "masks_moka",
-  "frames": "moka",
-  "note": "width_mm unknown -- the independent scale check is unavailable until measured"
+  "masks": "masks_ped",
+  "frames": "moka_ped",
+  "note": "on a 50 mm pedestal; width_mm still unmeasured",
+  "pedestal_mm": 50.0
 }

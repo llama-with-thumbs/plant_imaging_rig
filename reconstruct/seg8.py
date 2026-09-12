@@ -35,6 +35,42 @@ VAL_MIN = 30
 STAND_CUT = [None]          # filled in by stand_cut(), shared by every frame
 
 
+def lo_ok(cut, h):
+    """A waist cut is only believable in the lower part of the frame."""
+    return 0.30 * h < cut < 0.98 * h
+
+
+def waist_cut(mask, h):
+    """Cut where the silhouette pinches between the stand and the object.
+
+    The object now sits on a pedestal: a wide white disc carrying thin wire
+    legs. Neither is green and neither is cork, so the chroma key keeps both and
+    they would be carved into the model as part of the subject -- and they turn
+    with it, so no other view averages them away.
+
+    Looking for the stand by colour no longer works, because the disc is the
+    same pale metal as the pot. But the shape gives it away: read the silhouette
+    width from the bottom and it goes wide (disc), narrow (legs), wide (object).
+    Find the narrowest row in the lower half, then walk up out of the legs to
+    where the object begins, and cut there.
+    """
+    widths = mask.sum(axis=1).astype(float)
+    rows = np.where(widths > 0)[0]
+    if len(rows) < 10:
+        return h
+    lo, hi = rows.min(), rows.max()
+    band = slice(int(lo + 0.45 * (hi - lo)), hi)
+    seg = widths[band]
+    if not seg.size or seg.max() <= 0:
+        return h
+    waist = int(np.argmin(np.where(seg > 0, seg, seg.max()))) + band.start
+    thresh = max(2.0 * widths[waist], 0.25 * widths.max())
+    r = waist
+    while r > lo and widths[r] < thresh:
+        r -= 1
+    return int(r + 1)
+
+
 def stand_cut(paths, probe=12):
     """Decide one cut row for the whole set, from where the cork actually is.
 
@@ -88,8 +124,18 @@ def silhouette(path):
     # cork, and at 150-210 deg that panel was taken for the stand and sliced
     # 350 px off the object.
     cut = STAND_CUT[0] if STAND_CUT[0] is not None else int(h * 0.95)
-    # anything below the platter top is stand, not object
     m[cut:, :] = 0
+    # then, if the object stands on a pedestal, cut again at the pinch between
+    # the legs and the object itself
+    if os.environ.get("PEDESTAL"):
+        n0, l0, st0, _ = cv2.connectedComponentsWithStats(
+            cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((7, 7), np.uint8)), 8)
+        if n0 > 1:
+            big = (l0 == 1 + int(np.argmax(st0[1:, cv2.CC_STAT_AREA]))).astype(np.uint8)
+            wc = waist_cut(big, h)
+            if lo_ok(wc, h):
+                m[wc:, :] = 0
+                cut = wc
     # There was a rule here removing pale, bright pixels in the lower half of
     # the frame, to kill the white band on the stand. It was redundant -- the
     # stand cut above already zeroes everything below the platter -- and it was
