@@ -59,11 +59,23 @@ def plan():
     # and it put a tunnel back that 1.6 had closed. Over-blurring does not buy a
     # cleaner surface, it erodes the extremities and lets the field wobble back
     # across the isolevel. 1.4 added instead, between the two that work.
-    for thr in (33, 32, 34):
+    # Threshold 33 got the full blur ladder at every closing radius: nine runs,
+    # and blur cost silhouette match every single time without once improving
+    # topology. c3 reads 0.9046 -> 0.9027 -> 0.9006 as sigma goes 1.2 -> 1.4 ->
+    # 1.6, all genus 1. So closing radius is the lever and blur is close to pure
+    # cost; the other two thresholds get the closing sweep at the lightest blur,
+    # plus one sigma 1.4 probe at the best radius in case the interaction
+    # differs there. Ten configurations saved.
+    for close in (1, 2, 3):
+        for sigma in (1.2, 1.4, 1.6):
+            out.append(dict(kind="mesh", votes=33, close=close,
+                            sigma=sigma, tris=12000, nxz=260, ny=380))
+    for thr in (32, 34):
         for close in (1, 2, 3):
-            for sigma in (1.2, 1.4, 1.6):
-                out.append(dict(kind="mesh", votes=thr, close=close,
-                                sigma=sigma, tris=12000, nxz=260, ny=380))
+            out.append(dict(kind="mesh", votes=thr, close=close,
+                            sigma=1.2, tris=12000, nxz=260, ny=380))
+        out.append(dict(kind="mesh", votes=thr, close=3,
+                        sigma=1.4, tris=12000, nxz=260, ny=380))
     # then a finer carve, which is where genuinely new information can come from
     for thr in (33, 32):
         for close in (1, 2):
