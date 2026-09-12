@@ -105,11 +105,20 @@ def plan():
     # the same field through two other libraries. Neither wins on the silhouette
     # score, but that score only measures the outline -- it cannot see surface
     # quality, and isotropic remeshing looks markedly cleaner at equal budget.
+    # Judged against the baseline that actually won, not the one that was
+    # current when this group was written.
+    #
+    # All eight originally sat at threshold 33 on the 260x380 grid, which has
+    # since been beaten by 0.008. Left alone, a backend could be the better
+    # mesher and still score below every recent marching-cubes run purely
+    # because of where it was pinned -- an unfair comparison, not just a
+    # pessimistic one. The two that already ran at the old settings stay in the
+    # ledger; these repeat both backends at the winning carve, on both grids so
+    # the grid is not confounded with the mesher.
     for backend in ("poisson", "remesh"):
-        for close in (1, 2):
-            for sigma in (1.2, 1.6):
-                out.append(dict(kind=backend, votes=33, close=close, sigma=sigma,
-                                tris=12000, nxz=260, ny=380, backend=backend))
+        for nxz, ny in ((320, 460), (260, 380)):
+            out.append(dict(kind=backend, votes=32, close=3, sigma=1.2,
+                            tris=12000, nxz=nxz, ny=ny, backend=backend))
     # and only at the end, a triangle ladder at whatever settings won, to find
     # where the mesh really does start to lose the shape
     for tris in (4000, 6000, 8000, 16000, 40000):
