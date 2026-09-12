@@ -73,7 +73,18 @@ def grab(tag="now", lights=True):
            "ffmpeg -loglevel error -y -f v4l2 -input_format mjpeg "
            "-video_size 1280x960 -i %s " % USB +
            "-vf 'select=gte(n\\,8)' -frames:v 1 %s" % remote)
+    # The USB camera is not always released the instant its last reader exits,
+    # and v4l2 reports that as "Device or resource busy" -- a transient, not a
+    # fault. Clear any stale grabber and try again rather than failing the whole
+    # check on a race.
     r = ssh(cmd)
+    for attempt in range(3):
+        if not r.returncode:
+            break
+        if "busy" not in (r.stderr or "").lower():
+            break
+        ssh("pkill -f '[f]fmpeg' 2>/dev/null; sleep 2")
+        r = ssh(cmd)
     if r.returncode:
         raise RuntimeError("capture failed: %s" % (r.stderr.strip()[:200]))
     local = os.path.join(HERE, "zero_%s.jpg" % tag)
