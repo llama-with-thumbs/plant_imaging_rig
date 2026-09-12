@@ -86,12 +86,22 @@ def plan():
                     tris=12000, nxz=260, ny=380))
     out.append(dict(kind="mesh", votes=34, close=2, sigma=1.2,
                     tris=12000, nxz=260, ny=380))
-    # then a finer carve, which is where genuinely new information can come from
-    for thr in (33, 32):
-        for close in (1, 2):
-            for sigma in (1.4, 1.8):
-                out.append(dict(kind="carve", votes=thr, close=close,
-                                sigma=sigma, tris=12000, nxz=320, ny=460))
+    # A finer carve, at the settings that actually won rather than the ones
+    # that looked plausible before the sweep ran.
+    #
+    # This group was written first and probed 320x460 with close 1-2 and sigma
+    # 1.4-1.8 -- a combination now known to be a null result (the finer grid
+    # scored 0.9045 against 0.9046 for the same settings at 260x380) stacked on
+    # an inert parameter and a harmful one. Six configurations of that would
+    # have re-measured a constant at nearly double the carve cost, which is the
+    # same trap the triangle sweep fell into.
+    #
+    # Kept: the winning mesh settings at both live thresholds. If a finer grid
+    # helps anywhere it is at threshold 32, which keeps the most material and so
+    # has the most detail to resolve.
+    for thr in (32, 33):
+        out.append(dict(kind="carve", votes=thr, close=3, sigma=1.2,
+                        tris=12000, nxz=320, ny=460))
     # the same field through two other libraries. Neither wins on the silhouette
     # score, but that score only measures the outline -- it cannot see surface
     # quality, and isotropic remeshing looks markedly cleaner at equal budget.
