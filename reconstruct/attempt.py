@@ -22,6 +22,7 @@ import glob
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 import time
@@ -33,97 +34,64 @@ from scipy import ndimage
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGES = os.path.join(HERE, "pages")
-MODELS = os.path.join(PAGES, "models")
-LEDGER = os.path.join(HERE, "attempts.json")
-OBJ_H_MM, OBJ_W_MM = 270.0, 115.0
+MODELS = os.path.join(PAGES, "models")   # per-object subdir added in main()
+# Per object, not global. The configuration keys say nothing about what was
+# photographed, so a second subject written into the same ledger would collide
+# with every key from the first -- the loop would see them as already tried and
+# quietly stop, or worse, tabulate two different objects as if they were
+# comparable. Swapping the subject invalidates the whole comparison, so it gets
+# its own ledger and its own shelf in the gallery.
+_OBJ = json.load(open(os.path.join(HERE, "object.json")))
+SLUG = re.sub(r"[^a-z0-9]+", "-", _OBJ.get("name", "object").lower()).strip("-")
+LEDGER = os.path.join(HERE, "attempts_%s.json" % SLUG)
+OBJ_H_MM = float(_OBJ["height_mm"])
+OBJ_W_MM = float(_OBJ["width_mm"]) if _OBJ.get("width_mm") else None
 KEEP_PUBLISHED = 8            # bound the size of the gh-pages branch
 
 
 # ----------------------------------------------------------------- the plan
 def plan():
-    """Configurations to try, in order. Cheapest and most promising first.
+    """Configurations to try, in order, informed by the spray bottle's 26 runs.
 
-    Mesh settings come first because they reuse the cached vote field and cost
-    about a minute; anything that changes the carve has to recount 36 views
-    over the whole grid.
+    That sweep settled the mesh side and there is no reason to rediscover it
+    from scratch: triangle count was inert between 10k and 24k, blur only ever
+    cost silhouette match, closing radius was the cheap lever on topology, and
+    the vote threshold dominated everything. So this starts from the winning
+    configuration rather than at the edge of the grid, and spends its attempts
+    on the one parameter that mattered -- with two spot checks, because those
+    findings came from a different object and are assumptions until re-tested.
+
+    The threshold range reaches lower than the bottle's did, deliberately. This
+    object's error is its handle: a visual hull keeps only what every view calls
+    solid, and the handle sits in a different part of the silhouette at every
+    angle, so the intersection erodes it. Tolerating more dissent is the only
+    lever that can preserve it, and whether that is worth the bloat elsewhere is
+    exactly what wants measuring.
     """
     out = []
-    # Triangle count is held at 12000 through the sweep. The first three
-    # attempts varied only that -- 10k, 16k and 24k at identical settings --
-    # and scored 0.9039, 0.9039 and 0.9040. It does not move the silhouette at
-    # all in that range, so sweeping it alongside everything else would have
-    # spent two attempts in every three re-measuring a constant. 12000 because
-    # ties go to the lighter mesh.
-    # sigma 2.0 dropped after six attempts. At both closing radii tried it was
-    # worse than 1.6 on the silhouette AND on topology -- 0.8924 against 0.8983,
-    # and it put a tunnel back that 1.6 had closed. Over-blurring does not buy a
-    # cleaner surface, it erodes the extremities and lets the field wobble back
-    # across the isolevel. 1.4 added instead, between the two that work.
-    # Threshold 33 got the full blur ladder at every closing radius: nine runs,
-    # and blur cost silhouette match every single time without once improving
-    # topology. c3 reads 0.9046 -> 0.9027 -> 0.9006 as sigma goes 1.2 -> 1.4 ->
-    # 1.6, all genus 1. So closing radius is the lever and blur is close to pure
-    # cost; the other two thresholds get the closing sweep at the lightest blur,
-    # plus one sigma 1.4 probe at the best radius in case the interaction
-    # differs there. Ten configurations saved.
-    for close in (1, 2, 3):
-        for sigma in (1.2, 1.4, 1.6):
-            out.append(dict(kind="mesh", votes=33, close=close,
-                            sigma=sigma, tris=12000, nxz=260, ny=380))
-    for close in (1, 2, 3):
-        out.append(dict(kind="mesh", votes=32, close=close,
-                        sigma=1.2, tris=12000, nxz=260, ny=380))
-    out.append(dict(kind="mesh", votes=32, close=3,
-                    sigma=1.4, tris=12000, nxz=260, ny=380))
-    # Threshold 34 is finished after two runs and will not be swept further.
-    # It scores 0.844 against 0.911, and the volume is the tell: 433 cm3 for a
-    # bottle that holds 650 mL, so a third of the object has been eroded away
-    # rather than trimmed. It does reach a 5% edge bulge, but 32->33 buys five
-    # points of bulge for 0.006 of silhouette where 33->34 buys three more for
-    # 0.060. And closing radius was inert here as everywhere else -- 0.8442 at
-    # radius 1, 0.8447 at radius 2, genus 2 then 4.
-    out.append(dict(kind="mesh", votes=34, close=1, sigma=1.2,
-                    tris=12000, nxz=260, ny=380))
-    out.append(dict(kind="mesh", votes=34, close=2, sigma=1.2,
-                    tris=12000, nxz=260, ny=380))
-    # A finer carve, at the settings that actually won rather than the ones
-    # that looked plausible before the sweep ran.
-    #
-    # This group was written first and probed 320x460 with close 1-2 and sigma
-    # 1.4-1.8 -- a combination now known to be a null result (the finer grid
-    # scored 0.9045 against 0.9046 for the same settings at 260x380) stacked on
-    # an inert parameter and a harmful one. Six configurations of that would
-    # have re-measured a constant at nearly double the carve cost, which is the
-    # same trap the triangle sweep fell into.
-    #
-    # Kept: the winning mesh settings at both live thresholds. If a finer grid
-    # helps anywhere it is at threshold 32, which keeps the most material and so
-    # has the most detail to resolve.
-    for thr in (32, 33):
-        out.append(dict(kind="carve", votes=thr, close=3, sigma=1.2,
-                        tris=12000, nxz=320, ny=460))
-    # the same field through two other libraries. Neither wins on the silhouette
-    # score, but that score only measures the outline -- it cannot see surface
-    # quality, and isotropic remeshing looks markedly cleaner at equal budget.
-    # Judged against the baseline that actually won, not the one that was
-    # current when this group was written.
-    #
-    # All eight originally sat at threshold 33 on the 260x380 grid, which has
-    # since been beaten by 0.008. Left alone, a backend could be the better
-    # mesher and still score below every recent marching-cubes run purely
-    # because of where it was pinned -- an unfair comparison, not just a
-    # pessimistic one. The two that already ran at the old settings stay in the
-    # ledger; these repeat both backends at the winning carve, on both grids so
-    # the grid is not confounded with the mesher.
+    best = dict(close=3, sigma=1.2, tris=12000)
+    # the bottle's winner first, as a baseline on the new subject
+    out.append(dict(kind="baseline", votes=32, nxz=320, ny=460, **best))
+    # then the dominant parameter, reaching low enough to keep the handle
+    for thr in (28, 30, 34, 26, 24):
+        out.append(dict(kind="threshold", votes=thr, nxz=320, ny=460, **best))
+    # is the mesh side still inert on a faceted metal object?
+    out.append(dict(kind="check", votes=32, close=1, sigma=1.2, tris=12000,
+                    nxz=320, ny=460))
+    out.append(dict(kind="check", votes=32, close=3, sigma=1.6, tris=12000,
+                    nxz=320, ny=460))
+    out.append(dict(kind="check", votes=32, close=3, sigma=1.2, tris=24000,
+                    nxz=320, ny=460))
+    # does the finer grid still pay on a smaller object?
+    out.append(dict(kind="grid", votes=32, nxz=260, ny=380, **best))
+    # the two other meshers, at whatever threshold is winning by then
     for backend in ("poisson", "remesh"):
-        for nxz, ny in ((320, 460), (260, 380)):
-            out.append(dict(kind=backend, votes=32, close=3, sigma=1.2,
-                            tris=12000, nxz=nxz, ny=ny, backend=backend))
-    # and only at the end, a triangle ladder at whatever settings won, to find
-    # where the mesh really does start to lose the shape
-    for tris in (4000, 6000, 8000, 16000, 40000):
-        out.append(dict(kind="tris", votes=33, close=2, sigma=1.6,
-                        tris=tris, nxz=260, ny=380))
+        out.append(dict(kind=backend, votes=32, nxz=320, ny=460,
+                        backend=backend, **best))
+    # and how few triangles this shape survives
+    for tris in (4000, 6000, 8000, 16000):
+        out.append(dict(kind="tris", votes=32, close=3, sigma=1.2, tris=tris,
+                        nxz=320, ny=460))
     return out
 
 
@@ -189,7 +157,12 @@ def run(cfg):
     g = carve8.geometry(masks)
     persp.CU, persp.CV = g["cu"], g["cv"]
 
-    cache = os.path.join(HERE, "votes_%dx%d.npy" % (cfg["nxz"], cfg["ny"]))
+    # The object belongs in the cache key. Without it the first moka run loaded
+    # the spray bottle's vote volume -- the grid size matched, so the file looked
+    # valid -- and scored the bottle's hull against the pot's photographs: 0.51,
+    # and a 135 mm width where the carve gives 99. A cache keyed on shape alone
+    # silently answers the wrong question.
+    cache = os.path.join(HERE, "votes_%s_%dx%d.npy" % (SLUG, cfg["nxz"], cfg["ny"]))
     if os.path.exists(cache):
         votes = np.load(cache)
     else:
@@ -220,8 +193,10 @@ def run(cfg):
     rec["genus"] = int((2 - tm.euler_number) // 2)
     rec["volume_cm3"] = float(tm.volume / 1000) if tm.is_watertight else None
     rec["w_mm"], rec["h_mm"], rec["d_mm"] = [float(x) for x in bb]
+    rec["object"] = _OBJ.get("name")
     rec["h_err"] = float(bb[1] / OBJ_H_MM - 1)
-    rec["w_err"] = float(max(bb[0], bb[2]) / OBJ_W_MM - 1)
+    rec["w_err"] = (float(max(bb[0], bb[2]) / OBJ_W_MM - 1) if OBJ_W_MM else 0.0)
+    rec["w_known"] = bool(OBJ_W_MM)
     rec.update(mesh_silhouette_iou(tm, masks, ang, g))
     rec["backend"] = backend
     rec["repairs"] = notes

@@ -43,11 +43,20 @@ import persp
 import robust
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OBJ_H_MM, OBJ_W_MM = 270.0, 115.0
+# The object's own size, not a constant. It feeds the scale AND the camera
+# pitch: the lens sits 140 mm above the platter, so with a 270 mm object it was
+# level with the mid-height and the tilt was 0.8 degrees, while a 150 mm object
+# puts the mid-height at 75 mm and the camera looks down 10.8. Swapping the
+# subject changes the camera geometry even though nothing on the rig moved.
+_OBJ = json.load(open(os.path.join(HERE, "object.json")))
+OBJ_H_MM = float(_OBJ["height_mm"])
+OBJ_W_MM = float(_OBJ["width_mm"]) if _OBJ.get("width_mm") else None
+MASK_DIR = _OBJ.get("masks", "masks8")
 DIST_MM, LENS_H_MM = 340.0, 140.0
 
 
-def load_masks(d="masks8"):
+def load_masks(d=None):
+    d = d or MASK_DIR
     fs = sorted(glob.glob(os.path.join(HERE, d, "v*.png")))
     ms = np.stack([cv2.imread(f, cv2.IMREAD_GRAYSCALE) > 127 for f in fs])
     # Negated on purpose. Standing the bottle up means rotating every frame 90
@@ -67,13 +76,16 @@ def geometry(masks):
         ys, xs = np.where(m)
         tops.append(ys.min()); bots.append(ys.max())
         cxs.append(0.5 * (xs.min() + xs.max())); halfw.append(0.5 * (xs.max() - xs.min()))
-    top = int(np.percentile(tops, 10))       # the trigger tip sweeps; take a low quantile
+    top = int(np.percentile(tops, 10))       # an off-axis tip sweeps; take a low quantile
     bottom = int(np.median(bots))
     axis = float(np.mean(cxs))               # on a turntable, the axis is the mean centre
     height_px = bottom - top
     mm_per_px = OBJ_H_MM / height_px
-    radius_px = (OBJ_W_MM / 2.0) / mm_per_px
-    radius_px = max(radius_px, max(halfw) * 1.04)   # never carve inside the widest view
+    # Without a measured width, bound the grid by the widest silhouette instead.
+    # That is not a free lunch -- it removes the one independent check on scale,
+    # since height alone can be satisfied by a model of any width.
+    widest = max(halfw) * 1.06
+    radius_px = max((OBJ_W_MM / 2.0) / mm_per_px, widest) if OBJ_W_MM else widest
     pitch = -math.degrees(math.atan((LENS_H_MM - OBJ_H_MM / 2.0) / DIST_MM))
     k = mm_per_px / DIST_MM                  # 1/k is the camera distance in pixels
     return dict(top=top, bottom=bottom, height_px=height_px, axis=axis,
@@ -139,8 +151,13 @@ def main():
     print("\nbounding box %.1f x %.1f x %.1f mm" % tuple(bb))
     print("  height : %.1f mm vs %.1f measured  (%+.1f%%)"
           % (bb[1], OBJ_H_MM, 100 * (bb[1] / OBJ_H_MM - 1)))
-    print("  width  : %.1f mm vs %.1f measured  (%+.1f%%)   <- independent check"
-          % (max(bb[0], bb[2]), OBJ_W_MM, 100 * (max(bb[0], bb[2]) / OBJ_W_MM - 1)))
+    if OBJ_W_MM:
+        print("  width  : %.1f mm vs %.1f measured  (%+.1f%%)   <- independent check"
+              % (max(bb[0], bb[2]), OBJ_W_MM, 100 * (max(bb[0], bb[2]) / OBJ_W_MM - 1)))
+    else:
+        print("  width  : %.1f mm   (no measured width, so nothing checks the scale"
+              % max(bb[0], bb[2]))
+        print("           independently -- height alone is satisfied by any width)")
     json.dump({k: (float(v) if isinstance(v, (int, float, np.floating)) else v)
                for k, v in g.items() if k != "shape"},
               open(os.path.join(HERE, "geometry_g8.json"), "w"), indent=2)

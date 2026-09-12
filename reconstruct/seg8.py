@@ -75,7 +75,6 @@ def silhouette(path):
     # the cork stand and its ruler sticker turn with the object, so other views
     # cannot average them away -- they have to go by colour, not by position
     cork = ((H > 4) & (H < 34) & (S > 45) & (V > 35))
-    pale = (S < 45) & (V > 120)                      # the white ruler band
     m = (~screen & ~cork).astype(np.uint8)
 
     # Find where the stand starts, from the cork rather than from the screen.
@@ -91,7 +90,14 @@ def silhouette(path):
     cut = STAND_CUT[0] if STAND_CUT[0] is not None else int(h * 0.95)
     # anything below the platter top is stand, not object
     m[cut:, :] = 0
-    m[pale & (np.arange(h)[:, None] > h * 0.5)] = 0
+    # There was a rule here removing pale, bright pixels in the lower half of
+    # the frame, to kill the white band on the stand. It was redundant -- the
+    # stand cut above already zeroes everything below the platter -- and it was
+    # actively destructive on anything short: a 150 mm moka pot sits low in the
+    # frame and IS pale bright metal, so the rule ate most of the object and
+    # left silhouettes varying 61% in height. A rule aimed at the background by
+    # position rather than by colour only works while the subject stays out of
+    # that position.
 
     m[:, :6] = 0
     m[:, -6:] = 0

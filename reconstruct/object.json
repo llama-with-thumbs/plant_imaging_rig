@@ -1,0 +1,8 @@
+{
+  "name": "moka pot",
+  "height_mm": 150.0,
+  "width_mm": null,
+  "masks": "masks_moka",
+  "frames": "moka",
+  "note": "width_mm unknown -- the independent scale check is unavailable until measured"
+}
