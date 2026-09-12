@@ -73,7 +73,13 @@ def plan():
     # the bottle's winner first, as a baseline on the new subject
     out.append(dict(kind="baseline", votes=32, nxz=320, ny=460, **best))
     # then the dominant parameter, reaching low enough to keep the handle
-    for thr in (28, 30, 34, 26, 24):
+    # 26 and 24 dropped after 32/30/28 came back 0.8418 / 0.8384 / 0.8253 with
+    # bulge 8 / 12 / 16% and volume 346 / 381 / 415 cm3 -- monotonic in both
+    # directions, no inflection where the handle is rescued for free. Extra
+    # tolerance cannot distinguish the handle from every other unconstrained
+    # surface, so it inflates the whole pot to keep it. Two more runs down that
+    # line would only extend a straight line.
+    for thr in (34, 36):
         out.append(dict(kind="threshold", votes=thr, nxz=320, ny=460, **best))
     # is the mesh side still inert on a faceted metal object?
     out.append(dict(kind="check", votes=32, close=1, sigma=1.2, tris=12000,
