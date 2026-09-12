@@ -49,6 +49,15 @@ USB = ("/dev/v4l/by-id/"
 LOCK = ["--shutter", "29999", "--gain", "2.11",
         "--awbgains", "2.16,2.71", "--denoise", "cdn_off"]
 
+# For a backlit screen the exposure has to be set for the SCREEN, not the
+# object. At the green-screen setting the panel blows out over a third of the
+# frame, and an over-bright backdrop blooms into the object's edge -- exactly
+# the outline the whole method depends on. Measured across four shutters, 12000
+# keeps essentially all the contrast (169 against 178) and edge sharpness (126
+# against 132) while dropping clipping from 32.7% to 1.8%.
+BACKLIT = ["--shutter", "12000", "--gain", "1.0",
+           "--awbgains", "2.16,2.71", "--denoise", "cdn_off"]
+
 
 def grab_usb(path, skip=8):
     """One frame from the secondary camera, past the auto-exposure ramp."""
@@ -70,6 +79,11 @@ def main():
     ap.add_argument("--settle-ms", type=int, default=2500)
     ap.add_argument("--lock", action="store_true",
                     help="pin exposure and white balance (recommended)")
+    ap.add_argument("--backlit", action="store_true",
+                    help="exposure set for a glowing backdrop rather than a lit object")
+    ap.add_argument("--no-lights", action="store_true",
+                    help="leave the rig lamps off -- for a backlit silhouette, the "
+                         "front lighting only adds reflections to segment around")
     a = ap.parse_args()
 
     out = os.path.expanduser(a.out)
@@ -89,9 +103,14 @@ def main():
             "steps_per_rev": config.STEPS_PER_REV, "frames": []}
 
     t0 = time.time()
-    lights.on()
-    print("lights on, settling %d s" % config.LIGHT_SETTLE_SECONDS, flush=True)
-    time.sleep(config.LIGHT_SETTLE_SECONDS)
+    if a.no_lights:
+        lights.off()
+        print("lamps OFF -- silhouette comes from the backlight alone", flush=True)
+        time.sleep(2)
+    else:
+        lights.on()
+        print("lights on, settling %d s" % config.LIGHT_SETTLE_SECONDS, flush=True)
+        time.sleep(config.LIGHT_SETTLE_SECONDS)
     try:
         with platter:
             for i in range(a.stops):
@@ -100,7 +119,8 @@ def main():
                 ts = time.time()
                 capture_still(dest, mode=config.SENSOR_MODE,
                               settle_ms=a.settle_ms, timeout=90,
-                              extra_args=LOCK if a.lock else None)
+                              extra_args=(BACKLIT if a.backlit
+                                          else LOCK if a.lock else None))
                 ok = os.path.exists(dest) and os.path.getsize(dest) > 0
                 # the witness frame goes with the object frame, same stop
                 wok = grab_usb(os.path.join(wit, name))
