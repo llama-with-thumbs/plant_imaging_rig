@@ -65,6 +65,14 @@ def plan():
             for sigma in (1.4, 1.8):
                 out.append(dict(kind="carve", votes=thr, close=close,
                                 sigma=sigma, tris=12000, nxz=320, ny=460))
+    # the same field through two other libraries. Neither wins on the silhouette
+    # score, but that score only measures the outline -- it cannot see surface
+    # quality, and isotropic remeshing looks markedly cleaner at equal budget.
+    for backend in ("poisson", "remesh"):
+        for close in (1, 2):
+            for sigma in (1.2, 1.6):
+                out.append(dict(kind=backend, votes=33, close=close, sigma=sigma,
+                                tris=12000, nxz=260, ny=380, backend=backend))
     # and only at the end, a triangle ladder at whatever settings won, to find
     # where the mesh really does start to lose the shape
     for tris in (4000, 6000, 8000, 16000, 40000):
@@ -74,8 +82,10 @@ def plan():
 
 
 def key_of(cfg):
-    return "v%d_c%d_s%.1f_t%d_%dx%d" % (cfg["votes"], cfg["close"], cfg["sigma"],
+    base = "v%d_c%d_s%.1f_t%d_%dx%d" % (cfg["votes"], cfg["close"], cfg["sigma"],
                                         cfg["tris"], cfg["nxz"], cfg["ny"])
+    b = cfg.get("backend", "mc")
+    return base if b == "mc" else base + "_" + b
 
 
 # ------------------------------------------------------------------ scoring
@@ -143,7 +153,17 @@ def run(cfg):
         np.save(cache, votes)
 
     mesh8.NXZ, mesh8.NY, mesh8.VOTES = cfg["nxz"], cfg["ny"], cfg["votes"]
-    tm = mesh8.build(votes, cfg["close"], cfg["sigma"], cfg["tris"], key_of(cfg))
+    backend = cfg.get("backend", "mc")
+    notes = []
+    if backend == "mc":
+        tm = mesh8.build(votes, cfg["close"], cfg["sigma"], cfg["tris"], key_of(cfg))
+    else:
+        import backends as B
+        field, pad = mesh8.prepare_field(votes, cfg["close"], cfg["sigma"])
+        fn = B.build_poisson if backend == "poisson" else B.build_remesh
+        tm, _ = fn(field, cfg["votes"] - 0.5, cfg["tris"])
+        tm = mesh8.to_mm(tm, pad)
+    tm, notes = __import__("backends").repair(tm)
 
     bb = tm.bounds[1] - tm.bounds[0]
     rec = dict(cfg)
@@ -157,6 +177,8 @@ def run(cfg):
     rec["h_err"] = float(bb[1] / OBJ_H_MM - 1)
     rec["w_err"] = float(max(bb[0], bb[2]) / OBJ_W_MM - 1)
     rec.update(mesh_silhouette_iou(tm, masks, ang, g))
+    rec["backend"] = backend
+    rec["repairs"] = notes
     rec["ok"] = bool(rec["watertight"]
                      and abs(rec["h_err"]) < 0.08 and abs(rec["w_err"]) < 0.08)
     return tm, rec

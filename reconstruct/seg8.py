@@ -23,8 +23,8 @@ import numpy as np
 from scipy import ndimage
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, "green8mm")
-OUT = os.path.join(HERE, "masks8")
+SRC = os.path.join(HERE, os.environ.get("SRC_DIR", "green8mm"))
+OUT = os.path.join(HERE, os.environ.get("OUT_DIR", "masks8"))
 WORK_H = 1900                 # mask height to work at
 
 HUE_LO, HUE_HI = 40, 95       # screen measured at 68.4, sd 5.2

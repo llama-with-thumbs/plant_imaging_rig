@@ -75,6 +75,35 @@ def roughness(tm):
     return float(d.mean() / np.ptp(V, axis=0).max() * 1000)   # per mille of size
 
 
+def prepare_field(votes, close_radius, sigma):
+    """The smoothed, padded vote field and the pad offset, shared by all backends."""
+    pad = int(close_radius + 3 * sigma + 3)
+    field = np.pad(votes.astype(np.float32), pad)
+    if close_radius:
+        r = close_radius
+        zz, yy, xx = np.mgrid[-r:r + 1, -r:r + 1, -r:r + 1]
+        ball = (xx * xx + yy * yy + zz * zz) <= r * r
+        field = ndimage.grey_closing(field, footprint=ball)
+    if sigma:
+        field = ndimage.gaussian_filter(field, sigma)
+    return field, pad
+
+
+def to_mm(tm, pad):
+    """Map grid coordinates to millimetres, anchored to the axis and grid top."""
+    g = json.load(open(os.path.join(HERE, "geometry_g8.json")))
+    px_xz = (2 * g["radius"]) / (NXZ - 1)
+    px_y = g["height_px"] / (NY - 1)
+    mm = g["mm_per_px"]
+    V = np.asarray(tm.vertices) - pad
+    tm.vertices = np.column_stack([
+        (V[:, 0] - (NXZ - 1) / 2.0) * px_xz * mm,
+        (g["height_px"] - V[:, 1] * px_y) * mm,
+        (V[:, 2] - (NXZ - 1) / 2.0) * px_xz * mm,
+    ])
+    return tm
+
+
 def build(votes, close_radius, sigma, tris, label):
     # Pad with empty space FIRST. The object reaches the edge of the voxel grid
     # -- it stands on the platter, so its base is the last row -- and both the
