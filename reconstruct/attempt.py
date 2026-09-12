@@ -54,9 +54,14 @@ def plan():
     # all in that range, so sweeping it alongside everything else would have
     # spent two attempts in every three re-measuring a constant. 12000 because
     # ties go to the lighter mesh.
+    # sigma 2.0 dropped after six attempts. At both closing radii tried it was
+    # worse than 1.6 on the silhouette AND on topology -- 0.8924 against 0.8983,
+    # and it put a tunnel back that 1.6 had closed. Over-blurring does not buy a
+    # cleaner surface, it erodes the extremities and lets the field wobble back
+    # across the isolevel. 1.4 added instead, between the two that work.
     for thr in (33, 32, 34):
         for close in (1, 2, 3):
-            for sigma in (1.2, 1.6, 2.0):
+            for sigma in (1.2, 1.4, 1.6):
                 out.append(dict(kind="mesh", votes=thr, close=close,
                                 sigma=sigma, tris=12000, nxz=260, ny=380))
     # then a finer carve, which is where genuinely new information can come from
