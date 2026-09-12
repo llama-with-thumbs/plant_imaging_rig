@@ -51,52 +51,35 @@ KEEP_PUBLISHED = 8            # bound the size of the gh-pages branch
 
 # ----------------------------------------------------------------- the plan
 def plan():
-    """Configurations to try, in order, informed by the spray bottle's 26 runs.
+    """Configurations for the backlit capture, which changed the rules.
 
-    That sweep settled the mesh side and there is no reason to rediscover it
-    from scratch: triangle count was inert between 10k and 24k, blur only ever
-    cost silhouette match, closing radius was the cheap lever on topology, and
-    the vote threshold dominated everything. So this starts from the winning
-    configuration rather than at the edge of the grid, and spends its attempts
-    on the one parameter that mattered -- with two spot checks, because those
-    findings came from a different object and are assumptions until re-tested.
+    With the panel lit and the lamps off the silhouettes agree with each other,
+    and that inverts the finding that held on every earlier setup: strict
+    carving wins. 36 of 36 scores 0.9529 against 0.9382 at 34 and 0.9288 at 33,
+    monotonic, so the threshold question is closed at the top of its range --
+    robust voting was only ever compensation for masks that disagreed.
 
-    The threshold range reaches lower than the bottle's did, deliberately. This
-    object's error is its handle: a visual hull keeps only what every view calls
-    solid, and the handle sits in a different part of the silhouette at every
-    angle, so the intersection erodes it. Tolerating more dissent is the only
-    lever that can preserve it, and whether that is worth the bloat elsewhere is
-    exactly what wants measuring.
+    That leaves three things genuinely unknown. Whether a finer grid pays now
+    that the silhouettes are this clean, since grid resolution has only ever
+    been worth a thousandth or two against noisy input. Whether the mesh
+    settings stay inert in this regime -- they have been on three subjects, but
+    all three had disagreeing masks. And how far the triangle count can fall
+    before the shape goes, which is the question that started this.
     """
     out = []
-    best = dict(close=3, sigma=1.2, tris=12000)
-    # the bottle's winner first, as a baseline on the new subject
-    out.append(dict(kind="baseline", votes=32, nxz=320, ny=460, **best))
-    # then the dominant parameter, reaching low enough to keep the handle
-    # 26 and 24 dropped after 32/30/28 came back 0.8418 / 0.8384 / 0.8253 with
-    # bulge 8 / 12 / 16% and volume 346 / 381 / 415 cm3 -- monotonic in both
-    # directions, no inflection where the handle is rescued for free. Extra
-    # tolerance cannot distinguish the handle from every other unconstrained
-    # surface, so it inflates the whole pot to keep it. Two more runs down that
-    # line would only extend a straight line.
-    for thr in (34, 36):
-        out.append(dict(kind="threshold", votes=thr, nxz=320, ny=460, **best))
-    # is the mesh side still inert on a faceted metal object?
-    out.append(dict(kind="check", votes=32, close=1, sigma=1.2, tris=12000,
+    best = dict(votes=36, close=3, sigma=1.2, tris=12000)
+    out.append(dict(kind="baseline", nxz=320, ny=460, **best))
+    # does a finer grid finally pay, now that the input deserves it?
+    out.append(dict(kind="grid", nxz=400, ny=560, **best))
+    out.append(dict(kind="grid", nxz=260, ny=380, **best))
+    # are the mesh settings still inert when the masks agree?
+    out.append(dict(kind="check", votes=36, close=1, sigma=1.2, tris=12000,
                     nxz=320, ny=460))
-    out.append(dict(kind="check", votes=32, close=3, sigma=1.6, tris=12000,
+    out.append(dict(kind="check", votes=36, close=3, sigma=1.6, tris=12000,
                     nxz=320, ny=460))
-    out.append(dict(kind="check", votes=32, close=3, sigma=1.2, tris=24000,
-                    nxz=320, ny=460))
-    # does the finer grid still pay on a smaller object?
-    out.append(dict(kind="grid", votes=32, nxz=260, ny=380, **best))
-    # the two other meshers, at whatever threshold is winning by then
-    for backend in ("poisson", "remesh"):
-        out.append(dict(kind=backend, votes=32, nxz=320, ny=460,
-                        backend=backend, **best))
-    # and how few triangles this shape survives
-    for tris in (4000, 6000, 8000, 16000):
-        out.append(dict(kind="tris", votes=32, close=3, sigma=1.2, tris=tris,
+    # and the question that started all this
+    for tris in (6000, 3000, 24000, 1500):
+        out.append(dict(kind="tris", votes=36, close=3, sigma=1.2, tris=tris,
                         nxz=320, ny=460))
     return out
 
