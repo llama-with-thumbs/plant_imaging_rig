@@ -70,12 +70,22 @@ def plan():
         for sigma in (1.2, 1.4, 1.6):
             out.append(dict(kind="mesh", votes=33, close=close,
                             sigma=sigma, tris=12000, nxz=260, ny=380))
-    for thr in (32, 34):
-        for close in (1, 2, 3):
-            out.append(dict(kind="mesh", votes=thr, close=close,
-                            sigma=1.2, tris=12000, nxz=260, ny=380))
-        out.append(dict(kind="mesh", votes=thr, close=3,
-                        sigma=1.4, tris=12000, nxz=260, ny=380))
+    for close in (1, 2, 3):
+        out.append(dict(kind="mesh", votes=32, close=close,
+                        sigma=1.2, tris=12000, nxz=260, ny=380))
+    out.append(dict(kind="mesh", votes=32, close=3,
+                    sigma=1.4, tris=12000, nxz=260, ny=380))
+    # Threshold 34 is finished after two runs and will not be swept further.
+    # It scores 0.844 against 0.911, and the volume is the tell: 433 cm3 for a
+    # bottle that holds 650 mL, so a third of the object has been eroded away
+    # rather than trimmed. It does reach a 5% edge bulge, but 32->33 buys five
+    # points of bulge for 0.006 of silhouette where 33->34 buys three more for
+    # 0.060. And closing radius was inert here as everywhere else -- 0.8442 at
+    # radius 1, 0.8447 at radius 2, genus 2 then 4.
+    out.append(dict(kind="mesh", votes=34, close=1, sigma=1.2,
+                    tris=12000, nxz=260, ny=380))
+    out.append(dict(kind="mesh", votes=34, close=2, sigma=1.2,
+                    tris=12000, nxz=260, ny=380))
     # then a finer carve, which is where genuinely new information can come from
     for thr in (33, 32):
         for close in (1, 2):
