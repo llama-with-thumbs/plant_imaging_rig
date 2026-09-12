@@ -90,6 +90,21 @@ def grab(tag="now", lights=True):
     return band
 
 
+def ambiguity(res_row, best_i, guard=12):
+    """How close the runner-up peak is to the best one.
+
+    A ruler is a periodic target, so template matching finds a strong peak at
+    every mark, not just the right one. Returns second/best: near 1.0 means the
+    match is a coin toss between periods and the number it returns is arbitrary.
+    """
+    mask = np.ones(len(res_row), bool)
+    lo, hi = max(0, best_i - guard), min(len(res_row), best_i + guard + 1)
+    mask[lo:hi] = False
+    if not mask.any():
+        return 0.0
+    return float(res_row[mask].max() / max(res_row[best_i], 1e-6))
+
+
 def shift_px(a, b, margin=60):
     """Horizontal shift of b relative to a, by template matching.
 
@@ -115,7 +130,7 @@ def shift_px(a, b, margin=60):
         denom = (y0 - 2 * y1 + y2)
         if abs(denom) > 1e-9:
             dx += 0.5 * (y0 - y2) / denom
-    return dx, 0.0, float(peak)
+    return dx, ambiguity(r, x), float(peak)
 
 
 def step(n):
@@ -152,8 +167,8 @@ def main():
             before = grab("a")
             step(a.steps)
             after = grab("b", lights=True)
-            dx, dy, resp = shift_px(before, after)
-            if abs(dx) < 2 or resp < 0.25:
+            dx, amb, resp = shift_px(before, after)
+            if abs(dx) < 2 or resp < 0.25 or amb > 0.80:
                 print("calibration failed: %d steps moved the ruler %.2f px "
                       "(confidence %.3f). Check the ruler is lit and in view."
                       % (a.steps, dx, resp))
@@ -178,9 +193,9 @@ def main():
             return
         ref = np.load(REF)
         now = grab("now")
-        dx, dy, resp = shift_px(ref, now)
+        dx, amb, resp = shift_px(ref, now)
         st = json.load(open(STATE)) if os.path.exists(STATE) else None
-        line = "drift %+.2f px  (vertical %+.2f, confidence %.3f)" % (dx, dy, resp)
+        line = "drift %+.2f px  (peak %.3f, runner-up %.0f%% of it)" % (dx, resp, 100 * amb)
         steps = None
         if st:
             steps = -dx / st["px_per_step"]
@@ -190,6 +205,11 @@ def main():
                "steps": steps, "corrected": False}
         if resp < 0.25:
             print("  match too weak to trust (peak %.2f) -- doing nothing" % resp)
+        elif amb > 0.80:
+            print("  AMBIGUOUS: the runner-up peak is %.0f%% of the best, so the"
+                  % (100 * amb))
+            print("  ruler is aliasing and this offset is arbitrary. Refusing to move.")
+            print("  A non-repeating mark on the rim would fix this for good.")
         elif a.correct and st:
             if abs(dx) < a.deadband:
                 print("  inside the %.1f px deadband -- left alone" % a.deadband)
@@ -200,19 +220,48 @@ def main():
                 # another -- so a single px/step constant cannot null the drift
                 # in one go. Measuring after each move and re-estimating from
                 # what actually happened absorbs that.
-                pps = st["px_per_step"]
+                # Re-estimating the scale from each move sounds right and is a
+                # trap. The first move after a reversal is swallowed by about a
+                # degree of backlash, so it looks like the platter barely
+                # responds -- 1070 steps moved the ruler 7 px, implying 0.0065
+                # px/step against a calibrated 0.051. The loop then asked for
+                # 7354 steps, swung 68 degrees past, and left the platter worse
+                # than it found it.
+                #
+                # So: never stray far from the calibrated scale, never command a
+                # move larger than the calibrated one needs, and stop the moment
+                # a move makes things worse rather than trying to recover.
+                cal = st["px_per_step"]
+                pps = cal
                 moved_total = 0
-                for it in range(3):
+                best_dx = dx
+                for it in range(4):
                     n = int(round(-dx / pps))
+                    limit = int(abs(dx / cal) * 1.5) + 50
+                    n = max(-limit, min(limit, n))
                     if n == 0:
                         break
                     step(n); moved_total += n
                     after = grab("after%d" % it)
-                    dx_new, _, r_new = shift_px(ref, after)
-                    if r_new > 0.25 and abs(dx_new - dx) > 0.5:
-                        pps = (dx - dx_new) / float(-n)     # what it really did
+                    dx_new, amb_new, r_new = shift_px(ref, after)
+                    if amb_new > 0.80:
+                        print("  match became ambiguous -- stopping")
+                        break
                     print("  step %+d -> drift %+.2f px (was %+.2f, peak %.2f)"
                           % (n, dx_new, dx, r_new))
+                    if r_new < 0.25:
+                        print("  match lost -- stopping here")
+                        break
+                    if abs(dx_new) > abs(best_dx) + 0.5:
+                        print("  that made it worse -- stopping, not chasing it")
+                        dx = dx_new
+                        break
+                    best_dx = min(best_dx, abs(dx_new), key=abs) if False else dx_new
+                    # only trust a re-estimate that stays within 2x of calibration
+                    if abs(dx_new - dx) > 1.0:
+                        est = (dx - dx_new) / float(-n)
+                        if 0.5 * abs(cal) < abs(est) < 2.0 * abs(cal):
+                            pps = est
                     dx = dx_new
                     if abs(dx) < a.deadband:
                         break
