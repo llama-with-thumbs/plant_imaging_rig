@@ -184,6 +184,7 @@ def run(cfg):
         np.save(cache, votes)
 
     mesh8.NXZ, mesh8.NY, mesh8.VOTES = cfg["nxz"], cfg["ny"], cfg["votes"]
+    mesh8.GEOM = g                       # never inherit another subject's scale
     backend = cfg.get("backend", "mc")
     notes = []
     if backend == "mc":

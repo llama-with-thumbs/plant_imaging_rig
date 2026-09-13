@@ -110,19 +110,19 @@ def silhouette(path):
     return m, bgr, float(screen.mean())
 
 
-def waist_cut(mask, drop=0.55, run=12):
-    """Find where the object ends and its stand begins, scanning downwards.
+def waist_cut(mask, drop=0.55, swell=1.6, run=10):
+    """Cut where the object ends, whether the stand is narrower OR wider than it.
 
-    Looking for the narrowest row does not work. Below the object the profile is
-    legs (narrow), then the pedestal disc -- which is WIDER than the object --
-    and then a taper to a few pixels at the very tip. The global minimum is that
-    tip, not the legs, and a threshold derived from it puts the cut at the
-    bottom of everything.
+    Scanning down for a narrowing is not enough. It assumes the stand is thinner
+    than the subject, which held for a coffee bag on wire legs and fails for a
+    small figure on the same pedestal: the disc is nearly three times the
+    figure's width, so the first narrowing below the body is the legs UNDERNEATH
+    the disc, and cutting there keeps the disc.
 
-    Scanning down from the body avoids the question entirely. Take the body's
-    typical width from the upper half, then walk down and cut at the first place
-    the silhouette narrows past `drop` of it and stays narrow for `run` rows.
-    Nothing below that point is consulted, so a wide pedestal cannot confuse it.
+    Both transitions mean the same thing -- the silhouette stopped being the
+    object -- so watch for either. Take the body's width from the upper part,
+    then walk down and stop at the first sustained departure in either
+    direction. Whichever comes first is where the object ends.
     """
     widths = mask.sum(axis=1).astype(float)
     rows = np.where(widths > 0)[0]
@@ -133,9 +133,10 @@ def waist_cut(mask, drop=0.55, run=12):
     body = float(np.median(upper[upper > 0])) if (upper > 0).any() else 0.0
     if body <= 0:
         return mask.shape[0]
-    limit = drop * body
-    for r in range(lo + (hi - lo) // 3, hi - run):
-        if widths[r] < limit and np.all(widths[r:r + run] < body):
+    thin, fat = drop * body, swell * body
+    for r in range(lo + (hi - lo) // 4, hi - run):
+        seg = widths[r:r + run]
+        if np.all(seg < thin) or np.all(seg > fat):
             return r
     return hi + 1
 

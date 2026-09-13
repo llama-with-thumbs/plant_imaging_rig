@@ -41,6 +41,22 @@ import robust
 HERE = os.path.dirname(os.path.abspath(__file__))
 NXZ, NY, VOTES = 260, 380, 32
 
+# The geometry to scale the mesh with. Set this before building.
+#
+# It used to be read from geometry_g8.json every time, a file written by
+# whichever carve last ran. That is a global with no owner: carving one subject
+# and meshing another silently scaled the second by the first one's millimetres
+# per pixel -- a 95 mm figure came out 195 mm tall, exactly the height of the
+# object measured the run before. Passing it in makes the dependency explicit
+# and impossible to get stale.
+GEOM = None
+
+
+def _geom():
+    if GEOM is not None:
+        return GEOM
+    return json.load(open(os.path.join(HERE, "geometry_g8.json")))
+
 
 def vote_field():
     cache = os.path.join(HERE, "votes_g8.npy")
@@ -91,7 +107,7 @@ def prepare_field(votes, close_radius, sigma):
 
 def to_mm(tm, pad):
     """Map grid coordinates to millimetres, anchored to the axis and grid top."""
-    g = json.load(open(os.path.join(HERE, "geometry_g8.json")))
+    g = _geom()
     px_xz = (2 * g["radius"]) / (NXZ - 1)
     px_y = g["height_px"] / (NY - 1)
     mm = g["mm_per_px"]
@@ -132,7 +148,7 @@ def build(votes, close_radius, sigma, tris, label):
     # the body closes. "Keep voxels with >= 33 votes" is the same set either way.
     verts, faces, _, _ = measure.marching_cubes(field, level=VOTES - 0.5)
 
-    g = json.load(open(os.path.join(HERE, "geometry_g8.json")))
+    g = _geom()
     px_xz = (2 * g["radius"]) / (NXZ - 1)
     px_y = g["height_px"] / (NY - 1)
     mm = g["mm_per_px"]

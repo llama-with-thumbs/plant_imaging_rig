@@ -1,9 +1,9 @@
 {
-  "name": "coffee bag",
-  "height_mm": 195.0,
+  "name": "carved figure",
+  "height_mm": 95.0,
   "width_mm": null,
   "pedestal_mm": 50.0,
-  "masks": "masks_bag",
-  "frames": "bag",
-  "note": "backlit panel, lamps off; 50 mm pedestal; height measured 195 mm"
+  "masks": "masks_fig",
+  "frames": "fig",
+  "note": "backlit panel, lamps off, 50 mm pedestal; rigid subject"
 }
