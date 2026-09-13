@@ -165,7 +165,16 @@ def run(cfg):
     # valid -- and scored the bottle's hull against the pot's photographs: 0.51,
     # and a 135 mm width where the carve gives 99. A cache keyed on shape alone
     # silently answers the wrong question.
-    cache = os.path.join(HERE, "votes_%s_%dx%d.npy" % (SLUG, cfg["nxz"], cfg["ny"]))
+    # Keyed on the MASK DIRECTORY, not the object's name. Those are not the
+    # same thing: re-shooting the same subject gives a new capture under the
+    # same name, and the platter does not start at the same angle, so the old
+    # vote volume is silently wrong for the new masks. That happened -- two
+    # attempts carved from a stale cache and were scored against fresh masks,
+    # reporting 0.89 where the model was fine, and it looked like a real finding
+    # about triangle counts. The mask directory changes whenever the data does.
+    md = _OBJ.get("masks", "masks")
+    cache = os.path.join(HERE, "votes_%s_%s_%dx%d.npy"
+                         % (SLUG, md, cfg["nxz"], cfg["ny"]))
     if os.path.exists(cache):
         votes = np.load(cache)
     else:

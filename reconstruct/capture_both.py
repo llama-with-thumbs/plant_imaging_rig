@@ -81,6 +81,12 @@ def main():
                     help="pin exposure and white balance (recommended)")
     ap.add_argument("--backlit", action="store_true",
                     help="exposure set for a glowing backdrop rather than a lit object")
+    ap.add_argument("--colour", action="store_true",
+                    help="also take a lamp-lit frame at each stop, for texture. "
+                         "The silhouette pass is unlit by design, so the object is "
+                         "nearly black in it and carries no colour; taking both at "
+                         "the same stop keeps them in register, which a second "
+                         "revolution would not.")
     ap.add_argument("--no-lights", action="store_true",
                     help="leave the rig lamps off -- for a backlit silhouette, the "
                          "front lighting only adds reflections to segment around")
@@ -88,7 +94,10 @@ def main():
 
     out = os.path.expanduser(a.out)
     wit = os.path.join(out, "witness")
+    col = os.path.join(out, "colour")
     os.makedirs(wit, exist_ok=True)
+    if a.colour:
+        os.makedirs(col, exist_ok=True)
 
     lights = Lights(pin=config.LIGHT_PIN, schedule=(),
                     settle_seconds=config.LIGHT_SETTLE_SECONDS,
@@ -122,11 +131,22 @@ def main():
                               extra_args=(BACKLIT if a.backlit
                                           else LOCK if a.lock else None))
                 ok = os.path.exists(dest) and os.path.getsize(dest) > 0
+                # the lit frame for texture, at the same stop so it is in register
+                cok = False
+                if a.colour:
+                    lights.on()
+                    time.sleep(3.0)
+                    capture_still(os.path.join(col, name),
+                                  mode=config.SENSOR_MODE, settle_ms=a.settle_ms,
+                                  timeout=90, extra_args=LOCK)
+                    cok = os.path.exists(os.path.join(col, name))
+                    lights.off()
+                    time.sleep(1.5)
                 # the witness frame goes with the object frame, same stop
                 wok = grab_usb(os.path.join(wit, name))
                 meta["frames"].append(
                     {"file": name, "nominal_deg": i * 360.0 / a.stops,
-                     "ok": ok, "witness": wok,
+                     "ok": ok, "witness": wok, "colour": cok,
                      "bytes": os.path.getsize(dest) if ok else 0})
                 print("  %s  %6.1f deg  %s  witness %s  %.1fs"
                       % (name, i * 360.0 / a.stops, "ok" if ok else "FAILED",
