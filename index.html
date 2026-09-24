@@ -3,190 +3,628 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plant Imaging Rig</title>
-<meta name="description" content="Live view from a turntable plant-growth imaging rig.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+<title>Three cameras, two lamps &middot; Plant Imaging Rig</title>
+<meta name="description" content="A turntable rig was given extra cameras and a second lamp and asked to rebuild a 95 mm carved Buddha. Every addition was measured against the finished model.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127793;</text></svg>">
 <style>
-  :root {
-    --bg: #f6f7f3;
-    --panel: #ffffff;
-    --ink: #191d19;
-    --muted: #5c635b;
-    --line: #dfe3da;
-    --accent: #476b4f;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #131611;
-      --panel: #1a1e19;
-      --ink: #e7eae3;
-      --muted: #949b90;
-      --line: #2a2f27;
-      --accent: #83ac8b;
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    padding: 2rem 1.25rem 3rem;
-  }
-  .wrap { max-width: 1100px; margin: 0 auto; }
+:root{color-scheme:light dark}
+img{max-width:100%}
 
-  header { margin-bottom: 1.5rem; }
-  h1 {
-    margin: 0 0 .3rem;
-    font-size: clamp(1.4rem, 3.2vw, 2rem);
-    font-weight: 620;
-    letter-spacing: -0.02em;
+:root{
+  --paper:#EFEEE7; --card:#F8F7F1; --ink:#282B26; --ink-2:#464B42; --muted:#6B7165;
+  --rule:#D6D6CB; --rule-2:#E4E4D9;
+  --screen:#2C6A45; --lamp:#A9660E; --reject:#95311D;
+  --screen-bg:#E1EDE5; --lamp-bg:#F6EBDA; --reject-bg:#F6E3DE;
+  --shadow:0 1px 2px rgba(22,26,20,.05),0 8px 28px -14px rgba(22,26,20,.22);
+  --sans:Verdana,"DejaVu Sans",Tahoma,"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#161813; --card:#1E211B; --ink:#E2E5DA; --ink-2:#BFC5B7; --muted:#919786;
+    --rule:#2F332A; --rule-2:#262A22;
+    --screen:#77C595; --lamp:#DFA452; --reject:#E28A72;
+    --screen-bg:#16271D; --lamp-bg:#271E11; --reject-bg:#2A1913;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.8);
   }
-  .sub { margin: 0; color: var(--muted); font-size: .95rem; max-width: 60ch; }
+}
+:root[data-theme="dark"]{
+  --paper:#161813; --card:#1E211B; --ink:#E2E5DA; --ink-2:#BFC5B7; --muted:#919786;
+  --rule:#2F332A; --rule-2:#262A22;
+  --screen:#77C595; --lamp:#DFA452; --reject:#E28A72;
+  --screen-bg:#16271D; --lamp-bg:#271E11; --reject-bg:#2A1913;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.8);
+}
 
-  .stack { display: flex; flex-direction: column; gap: 1.25rem; }
+/* Reader-chosen background tints. A tinted page is the single most effective
+   adjustment for visual stress, and which tint helps is personal -- so it is the
+   reader's choice, not mine. These sit after the theme blocks deliberately:
+   :root[data-tint=...] and :root:not([data-theme=...]) have equal specificity, so
+   whichever comes last wins, and the reader's explicit pick should. */
+:root[data-tint="cream"]{--paper:#FBF3DE; --card:#FFFAEC; --ink:#33301F; --ink-2:#4E4A33;
+  --muted:#7A745A; --rule:#E4D9BC; --rule-2:#EFE7CF}
+:root[data-tint="blue"]{--paper:#E6EEF5; --card:#F2F7FB; --ink:#252C33; --ink-2:#414951;
+  --muted:#667079; --rule:#C9D7E3; --rule-2:#DCE6EE}
+:root[data-tint="green"]{--paper:#E6F0E6; --card:#F2F8F2; --ink:#253026; --ink-2:#414D42;
+  --muted:#66766A; --rule:#C9DBCB; --rule-2:#DCE9DD}
+:root[data-tint="rose"]{--paper:#F6EAEA; --card:#FCF4F4; --ink:#322727; --ink-2:#4E4141;
+  --muted:#79696A; --rule:#E2CFD0; --rule-2:#EDE0E0}
+:root[data-tint="grey"]{--paper:#E8E8E6; --card:#F3F3F1; --ink:#2B2C2A; --ink-2:#474947;
+  --muted:#6C6E6B; --rule:#D2D2CF; --rule-2:#E1E1DE}
+:root[data-tint="dark"]{--paper:#161813; --card:#1E211B; --ink:#E2E5DA; --ink-2:#BFC5B7;
+  --muted:#919786; --rule:#2F332A; --rule-2:#262A22;
+  --screen:#77C595; --lamp:#DFA452; --reject:#E28A72;
+  --screen-bg:#16271D; --lamp-bg:#271E11; --reject-bg:#2A1913;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.8)}
 
-  .frame {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    overflow: hidden;
-  }
-  .shot { display: block; width: 100%; height: auto; background: var(--line); }
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans);
+  /* the three the reader can change; everything sizes off them */
+  font-size:var(--size,18px);
+  line-height:var(--leading,1.7);
+  letter-spacing:var(--tracking,.012em);
+  word-spacing:var(--wording,.07em);
+  text-align:left;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1140px; margin:0 auto; padding:0 24px 96px}
+.col{max-width:64ch}
+h1,h2,h3{font-family:var(--sans); font-weight:700; text-wrap:balance; line-height:1.28; margin:0}
+h1{font-size:clamp(1.95rem,4.4vw,2.85rem)}
+h2{font-size:clamp(1.34rem,2.6vw,1.68rem)}
+h3{font-size:1.08rem}
+p{margin:0}
+a{color:var(--screen)}
+.lede{font-size:1.1rem; line-height:1.68; color:var(--ink-2)}
+.label{font-size:.85rem; font-weight:700; letter-spacing:.03em; color:var(--muted)}
+.stack{display:flex; flex-direction:column; gap:22px}
+.stack-s{display:flex; flex-direction:column; gap:12px}
+section{display:flex; flex-direction:column; gap:26px; padding-top:54px}
+section+section{border-top:1px solid var(--rule-2); margin-top:40px}
+.head{display:flex; flex-direction:column; gap:12px; max-width:64ch}
 
-  /* The subject is a tall portrait crop; cap it so the page stays scannable. */
-  .subject-wrap { display: flex; justify-content: center; background: var(--line); }
-  .subject-wrap img { max-height: min(70vh, 780px); width: auto; max-width: 100%; }
+/* masthead */
+header{padding:64px 0 8px; display:flex; flex-direction:column; gap:22px}
+.byline{display:flex; flex-wrap:wrap; gap:10px 22px; align-items:baseline; color:var(--ink-2); font-size:.93rem}
+.byline b{color:var(--ink-2); font-weight:600}
 
-  .caption {
-    display: flex; align-items: baseline; gap: .5rem;
-    padding: .7rem 1.1rem;
-    border-bottom: 1px solid var(--line);
-    font-size: .82rem;
-  }
-  .caption b { font-weight: 600; letter-spacing: .01em; }
-  .caption span { color: var(--muted); }
+/* figures */
+figure{margin:0; display:flex; flex-direction:column; gap:10px}
+figure img{display:block; width:100%; height:auto; border-radius:7px; background:#0c0e0b}
+figcaption{font-size:.92rem; line-height:1.6; color:var(--ink-2); max-width:62ch}
+figcaption b{color:var(--ink-2); font-weight:600}
 
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem 2rem;
-    padding: .95rem 1.15rem;
-    border-top: 1px solid var(--line);
-    font-size: .88rem;
-  }
-  .meta div { display: flex; gap: .45rem; align-items: baseline; }
-  .k { color: var(--muted); }
-  .v { font-variant-numeric: tabular-nums; font-weight: 560; }
+/* stat tiles */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(138px,1fr)); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-radius:9px; overflow:hidden}
+.stat{background:var(--card); padding:15px 17px; display:flex; flex-direction:column; gap:3px}
+.stat .v{font-family:var(--sans); font-size:1.52rem; line-height:1.1; font-variant-numeric:tabular-nums}
+.stat .k{font-size:.82rem; letter-spacing:0; color:var(--muted)}
 
-  .live {
-    display: inline-flex; align-items: center; gap: .45rem;
-    color: var(--accent); font-weight: 600;
-  }
-  .dot {
-    width: .5rem; height: .5rem; border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 2.4s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
-  @media (prefers-reduced-motion: reduce) { .dot { animation: none } }
+/* verdict chips */
+.chip{display:inline-flex; align-items:center; gap:7px; padding:3px 11px 3px 9px; border-radius:100px;
+  font-size:.8rem; letter-spacing:0; word-spacing:0; font-weight:700;
+  border:1px solid transparent; white-space:nowrap}
+.chip::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor}
+.chip.keep{color:var(--screen); background:var(--screen-bg); border-color:color-mix(in srgb,var(--screen) 26%,transparent)}
+.chip.part{color:var(--lamp); background:var(--lamp-bg); border-color:color-mix(in srgb,var(--lamp) 26%,transparent)}
+.chip.drop{color:var(--reject); background:var(--reject-bg); border-color:color-mix(in srgb,var(--reject) 26%,transparent)}
 
-  #rulerCard[hidden] { display: none; }
+/* finding cards */
+.cards{display:grid; gap:14px}
+.card{background:var(--card); border:1px solid var(--rule); border-radius:10px; padding:20px 22px;
+  display:flex; flex-direction:column; gap:11px; box-shadow:var(--shadow)}
+.card .top{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between}
+.card p{color:var(--ink-2); font-size:1rem}
+.card .why{font-size:.94rem; color:var(--muted)}
+.card .why b{color:var(--ink-2); font-weight:600}
 
-  footer { margin-top: 1.5rem; color: var(--muted); font-size: .84rem; }
-  a { color: var(--accent); }
+/* tables */
+.scroll{overflow-x:auto; border:1px solid var(--rule); border-radius:9px; background:var(--card)}
+table{border-collapse:collapse; width:100%; font-size:.94rem; min-width:520px}
+th,td{text-align:left; padding:10px 15px; border-bottom:1px solid var(--rule-2); vertical-align:top}
+thead th{font-size:.85rem; letter-spacing:0; word-spacing:0;
+  color:var(--ink-2); font-weight:700; background:color-mix(in srgb,var(--ink) 3%,var(--card)); white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums;
+  font-size:.88rem; letter-spacing:0; word-spacing:0; white-space:nowrap}
+td.name{font-weight:600}
+.best{color:var(--screen); font-weight:600}
+.bad{color:var(--reject)}
+
+/* pull quote / key idea */
+.key{border-left:3px solid var(--screen); padding:4px 0 4px 20px; max-width:680px}
+.key p{font-family:var(--sans); font-size:1.12rem; line-height:1.6; font-weight:600; color:var(--ink)}
+
+/* two-up */
+.two{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:22px}
+
+/* downloads */
+.files{display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:9px; overflow:hidden}
+.file{background:var(--card); padding:13px 17px; display:flex; flex-wrap:wrap; gap:4px 14px; align-items:baseline}
+.file code{font-family:var(--mono); font-size:.83rem; color:var(--ink); font-weight:600}
+.file span{font-size:.93rem; color:var(--ink-2); flex:1 1 220px}
+.file .size{font-family:var(--mono); font-size:.82rem; letter-spacing:0; color:var(--muted)}
+
+footer{padding-top:54px; margin-top:44px; border-top:1px solid var(--rule-2); color:var(--ink-2); font-size:.92rem; max-width:64ch}
+
+/* lists used as prose: generous gaps so each point is its own resting place */
+ul.steps{margin:0; padding-left:1.35em; display:flex; flex-direction:column; gap:11px; max-width:64ch}
+ul.steps li{padding-left:.2em}
+ul.steps li::marker{color:var(--screen)}
+.card ul.steps{color:var(--muted); font-size:.94rem}
+.card ul.steps b{color:var(--ink-2)}
+.note{display:flex; flex-direction:column; gap:11px; max-width:64ch;
+  font-size:.94rem; color:var(--ink-2); border-left:3px solid var(--rule); padding-left:18px}
+
+/* Reading controls */
+.reader{position:sticky; top:0; z-index:40; margin:0 -24px 0; padding:9px 24px;
+  background:color-mix(in srgb,var(--paper) 92%,transparent); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--rule-2);
+  display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center}
+.reader .grp{display:flex; align-items:center; gap:7px}
+.reader .cap{font-size:.8rem; color:var(--muted); letter-spacing:0; word-spacing:0}
+.reader button{font:inherit; font-size:.82rem; letter-spacing:0; word-spacing:0;
+  padding:4px 11px; min-height:32px; border-radius:6px; cursor:pointer;
+  border:1px solid var(--rule); background:var(--card); color:var(--ink-2)}
+.reader button:hover{border-color:var(--screen); color:var(--screen)}
+.reader button[aria-pressed="true"]{border-color:var(--screen); color:var(--screen);
+  background:var(--screen-bg); font-weight:700}
+.reader button:focus-visible{outline:2px solid var(--screen); outline-offset:2px}
+.swatches{display:flex; gap:5px}
+.sw{width:32px; height:32px; padding:0; border-radius:6px; cursor:pointer;
+  border:2px solid var(--rule)}
+.sw[aria-pressed="true"]{border-color:var(--screen); box-shadow:0 0 0 2px var(--screen-bg)}
+.sw:focus-visible{outline:2px solid var(--screen); outline-offset:2px}
+@media (max-width:640px){ .reader{padding:8px 16px; margin:0 -24px} .reader .cap{display:none} }
+
+/* 3D viewer */
+.viewer{border:1px solid var(--rule); border-radius:10px; overflow:hidden; background:
+  radial-gradient(120% 95% at 50% 4%, color-mix(in srgb,var(--screen) 8%,var(--card)) 0%, var(--card) 62%);
+  box-shadow:var(--shadow)}
+#stage{display:block; width:100%; height:clamp(420px,62vh,640px); touch-action:none; cursor:grab}
+#stage:active{cursor:grabbing}
+#stage:focus-visible{outline:2px solid var(--screen); outline-offset:-2px}
+.vbar{display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; justify-content:space-between;
+  padding:12px 16px; border-top:1px solid var(--rule); background:var(--card)}
+.vhint{font-size:.88rem; color:var(--ink-2)}
+.vctl{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center}
+.vctl label{display:flex; align-items:center; gap:9px; font-size:.82rem;
+  letter-spacing:0; word-spacing:0; color:var(--muted)}
+.vctl input[type=range]{width:106px; accent-color:var(--screen)}
+.vctl button{font:inherit; font-size:.8rem; padding:5px 13px; border-radius:6px; cursor:pointer;
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink-2)}
+.vctl button:hover{border-color:var(--screen); color:var(--screen)}
+.vctl button:focus-visible{outline:2px solid var(--screen); outline-offset:2px}
+
+/* site navigation */
+.sitenav{display:flex; flex-wrap:wrap; gap:8px}
+.sitenav a{font-size:.88rem; letter-spacing:0; word-spacing:0; text-decoration:none;
+  padding:6px 13px; min-height:34px; display:inline-flex; align-items:center; border-radius:6px;
+  border:1px solid var(--rule); background:var(--card); color:var(--ink-2)}
+.sitenav a:hover{border-color:var(--screen); color:var(--screen)}
+.sitenav a:focus-visible{outline:2px solid var(--screen); outline-offset:2px}
+a.file{text-decoration:none; color:inherit}
+a.file:hover code{color:var(--screen)}
+
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Plant Imaging Rig</h1>
-    <p class="sub">
-      A single fixed camera photographs a subject on a motorised turntable. A second camera
-      reads a ruler on the platter rim, so the platter&rsquo;s position can be measured rather
-      than assumed. These are the most recent frames from both.
-    </p>
-  </header>
 
-  <div class="stack">
-    <div class="frame">
-      <div class="caption"><b>Subject</b><span>IMX477, cropped to the backdrop</span></div>
-      <div class="subject-wrap">
-        <img id="shot" src="latest.jpg" alt="Most recent frame of the subject">
-      </div>
-      <div class="meta">
-        <div><span class="live"><span class="dot"></span>Live</span></div>
-        <div><span class="k">Captured</span><span class="v" id="captured">&mdash;</span></div>
-        <div><span class="k">Angle</span><span class="v" id="angle">&mdash;</span></div>
-        <div><span class="k">Revolution</span><span class="v" id="cycle">&mdash;</span></div>
-        <div><span class="k">Camera</span><span class="v" id="camera">&mdash;</span></div>
-      </div>
-    </div>
-
-    <div class="frame" id="rulerCard" hidden>
-      <div class="caption"><b>Position</b><span>USB camera, cropped to the rim scale</span></div>
-      <img id="ruler" class="shot" src="ruler.jpg" alt="Ruler on the platter rim, showing platter position">
+<nav class="reader" aria-label="Reading controls">
+  <div class="grp">
+    <span class="cap">Text</span>
+    <button type="button" data-size="-1" aria-label="Smaller text">A&minus;</button>
+    <button type="button" data-size="+1" aria-label="Larger text">A+</button>
+  </div>
+  <div class="grp">
+    <span class="cap">Spacing</span>
+    <button type="button" data-space="0" aria-pressed="true">Normal</button>
+    <button type="button" data-space="1" aria-pressed="false">Wide</button>
+    <button type="button" data-space="2" aria-pressed="false">Widest</button>
+  </div>
+  <div class="grp">
+    <span class="cap">Page colour</span>
+    <div class="swatches">
+      <button type="button" class="sw" data-tint="" aria-pressed="true" aria-label="Default page colour" style="background:#EFEEE7"></button>
+      <button type="button" class="sw" data-tint="cream" aria-pressed="false" aria-label="Cream" style="background:#FBF3DE"></button>
+      <button type="button" class="sw" data-tint="blue" aria-pressed="false" aria-label="Pale blue" style="background:#E6EEF5"></button>
+      <button type="button" class="sw" data-tint="green" aria-pressed="false" aria-label="Pale green" style="background:#E6F0E6"></button>
+      <button type="button" class="sw" data-tint="rose" aria-pressed="false" aria-label="Pale rose" style="background:#F6EAEA"></button>
+      <button type="button" class="sw" data-tint="grey" aria-pressed="false" aria-label="Grey" style="background:#E8E8E6"></button>
+      <button type="button" class="sw" data-tint="dark" aria-pressed="false" aria-label="Dark" style="background:#1E211B"></button>
     </div>
   </div>
+</nav>
 
-  <p style="margin:1.25rem 0 0">
-    <a href="model.html">View the 3D model &rarr;</a>
-    <span style="color:var(--muted)"> &mdash; carved from 36 turntable photographs</span>
-  </p>
+<header>
+  <div class="label">Plant Imaging Rig &middot; reconstruction runs 4 to 6</div>
+  <h1>Three cameras, two lamps</h1>
+  <p class="lede col">A turntable rig was given extra cameras and a second lamp, and asked to rebuild a
+  95&nbsp;mm carved Buddha. Every addition was tested against the finished model rather than assumed.
+  This run starts from a real zero for the first time &mdash; the platter is homed on a ruler wrapped
+  round its rim &mdash; and it produced the best model the rig has made. The second camera has now been
+  re-lensed, re-aimed and re-fitted across three runs, and still cannot contribute. The reason has
+  changed each time, which is the interesting part.</p>
+  <div class="byline">
+    <span><b>324 frames</b> in one 496-second run</span>
+    <span>36 stops &times; 3 cameras &times; 3 lighting conditions</span>
+    <span>Raspberry&nbsp;Pi&nbsp;/ IMX477 + UVC</span>
+  </div>
 
-  <footer>
-    Refreshes automatically. Source on
-    <a href="https://github.com/llama-with-thumbs/plant_imaging_rig">GitHub</a>.
-  </footer>
+  <nav class="sitenav" aria-label="Site">
+    <a href="model.html">3D model on its own page</a>
+    <a href="#files">Download the model</a>
+    <a href="live.html">Live view</a>
+    <a href="models.html">Earlier: bottle models</a>
+    <a href="https://github.com/llama-with-thumbs/plant_imaging_rig">Code on GitHub</a>
+  </nav>
+</header>
+
+<div class="viewer" style="margin-top:34px">
+  <canvas id="stage" aria-label="Interactive 3D model of the carving. Drag to rotate, scroll to zoom, arrow keys also work."></canvas>
+  <div class="vbar">
+    <div class="vhint" id="vnote">Loading the model&hellip;</div>
+    <div class="vctl">
+      <label>Relief
+        <input type="range" id="vrelief" min="0" max="2.2" step="0.05" value="1">
+      </label>
+      <label>Exposure
+        <input type="range" id="vexp" min="0.7" max="2.6" step="0.05" value="1.45">
+      </label>
+      <button type="button" id="vspin" aria-pressed="true">Pause</button>
+      <button type="button" id="vreset">Reset</button>
+    </div>
+  </div>
+</div>
+<p style="font-size:.92rem;color:var(--ink-2);max-width:64ch;margin-top:12px">
+The current model, 8,530 triangles with its base colour and normal map, drawn in the page.
+Pull the <b>relief</b> slider to zero to switch the normal map off: the geometry underneath does not
+change, so everything that disappears is surface detail the two-lamp solve contributed and the carve
+never had. Rotate to the front and you can see through both openings under the arms. The same viewer is on <a href="model.html">a page of its own</a>, which is the one to share.</p>
+
+<div class="stats" style="margin-top:34px">
+  <div class="stat"><span class="v">0.968</span><span class="k">reprojection IoU</span></div>
+  <div class="stat"><span class="v">95.0 mm</span><span class="k">height</span></div>
+  <div class="stat"><span class="v">2</span><span class="k">genus</span></div>
+  <div class="stat"><span class="v">8,530</span><span class="k">triangles</span></div>
+  <div class="stat"><span class="v">0.047&deg;</span><span class="k">homed to</span></div>
+</div>
+
+<section>
+  <div class="head">
+    <div class="label">The constraint everything follows from</div>
+    <h2>A turntable cannot look down</h2>
+  </div>
+  <div class="col stack">
+    <p>Rotating an object about a vertical axis changes where things are in azimuth and nothing else.
+    The vertical component of every direction &mdash; to a camera, to a lamp &mdash; is fixed before the
+    platter starts turning, and no number of stops will change it.</p>
+    <div class="key"><p>Thirty-six views of a turntable are thirty-six samples of one horizontal ring.
+    A hundred and eighty would be a hundred and eighty samples of the same ring.</p></div>
+    <p>This one fact explains both of the rig's known limits:</p>
+    <ul class="steps">
+      <li>Silhouettes from a single ring can never bound a surface that faces straight up or down. That
+      is why adding views stopped helping long ago &mdash; 36 views leave the hull 23.6% too large, and
+      180 views only reach 20.4%.</li>
+      <li>A single lamp on that ring makes photometric stereo rank-deficient. Every light direction
+      shares one elevation, so the normal equations have nothing to say about the third dimension.</li>
+    </ul>
+    <p>Every addition tested here attacks that constraint directly. The second lamp sits at a different
+    height. The extra cameras were mounted above the first.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <div class="label">The bug that nearly ruined it</div>
+    <h2>Five stops, one pose</h2>
+    <p class="lede">Before any of the measurements below could be trusted, a capture had to be thrown
+    away. It is worth describing because nothing about it looked wrong.</p>
+  </div>
+
+  <figure>
+    <img src="img/fig-stale-frames.jpg" loading="lazy" alt="Two rows of five frames from the upper camera: the top row shows the same pose five times, the bottom shows the statue rotating">
+    <figcaption>The same five platter stops from the upper camera. <b>Top:</b> the stream read on demand
+    &mdash; one pose, five times. <b>Bottom:</b> the same code with a reader thread. Meanwhile the main
+    camera showed the platter turning perfectly through all five.</figcaption>
+  </figure>
+
+  <div class="col stack">
+    <p>The frames were valid JPEGs of the right scene at the right brightness. They were simply all from
+    the beginning of the run. Pairwise difference between them was 1.9 to 2.8 &mdash; sensor noise.</p>
+    <p>The camera produces frames continuously, but each stop spends several seconds changing lamps and
+    taking a main-camera still, so only about two frames get consumed every four seconds. A backlog
+    builds in the pipe, inside ffmpeg, and in the driver's own queue. Draining the pipe before each grab
+    empties only the pipe; ffmpeg refills it from its own buffers immediately.</p>
+    <p>It was resolution-dependent, which is how it hid for a whole earlier run. At 1280&times;720 the
+    drain mostly kept up and cost a little freshness. At 1920&times;1080 it failed outright.</p>
+    <p class="why"><b>The fix</b> is a reader thread that never stops consuming, keeping only the newest
+    frame &mdash; a thread that always reads cannot fall behind. <b>The lesson</b> is the cheap check
+    that now runs before anything is carved: crop the subject, difference every pair of views, and
+    compare against the camera's own noise floor. A carve built on frozen frames is quietly
+    meaningless, and nothing else in the pipeline would have complained.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <div class="label">Starting from a real zero</div>
+    <h2>The platter now knows where it is</h2>
+    <p class="lede">Until this run every capture began wherever the platter happened to be left. It now
+    begins at a printed mark, found optically, and the difference shows in the result.</p>
+  </div>
+  <div class="col stack">
+    <p>A 380&nbsp;mm ruler is wrapped exactly once around the rim, so every angle has a unique reading
+    at 0.947&nbsp;degrees per millimetre. The lower camera reads it. Zero is the tape's seam, which is
+    the one vertical edge running the full height of the tape and so is trivial to find.</p>
+    <p>This matters because the rig has no homing switch, no limit switch and no encoder. An earlier
+    attempt to track the rim by template matching refused to act about as often as it acted, because a
+    finely divided scale is the worst possible tracking target: every tick matches its neighbours
+    equally well, so the answer is a coin toss between periods. Its own code asked for the remedy
+    &mdash; <b>a non-repeating mark</b>. The printed numbers are that mark.</p>
+    <ul class="steps">
+      <li>Homing repeats to <b>0.285&deg;</b>, measured by independently locating the seam over five
+      trials with a quarter turn between them. This drive's uncompensated backlash is about 1&deg;.</li>
+      <li>This run homed to <b>0.047&deg;</b> in a single move.</li>
+      <li>The main camera's silhouette height now varies <b>1.3%</b> across the rotation, against 3.6%
+      and 4.1% on the two previous runs.</li>
+    </ul>
+    <div class="key"><p>It also caught something previously invisible: one commanded move of 3,353
+    steps delivered 300. Open loop that would have silently ruined a capture, and nothing else in the
+    rig would have noticed.</p></div>
+    <p class="why"><b>One honest limitation.</b> Per-stop angle logging is built and works, but the
+    setting that reads the ruler is not stable across a session &mdash; an exposure measured as correct
+    became unreadable twenty minutes later because the room lighting changed. Homing at the start of a
+    run is reliable; continuous per-stop tracking wants the rig enclosed first.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <div class="label">Viewpoints</div>
+    <h2>A third attempt at the top camera</h2>
+    <p class="lede">Cam A has now been rebuilt around every objection in turn. It is still not
+    contributing, and the reason has moved again.</p>
+  </div>
+
+  <figure>
+    <img src="img/fig-three-cameras.jpg" loading="lazy" alt="Four turntable stops as seen by each of the three cameras">
+    <figcaption>Four stops from each camera. <b>MAIN</b> carries the shape. <b>Cam A</b> has been
+    re-lensed with the same lens as MAIN and turned a quarter over, so the subject now fills its frame
+    and it is genuinely sharp. <b>Cam B</b> no longer looks at the subject at all &mdash; it reads the
+    ruler.</figcaption>
+  </figure>
+
+  <div class="scroll"><table>
+    <thead><tr><th>What was wrong with cam A</th><th class="n">Run 4</th><th class="n">Run 5</th><th class="n">Run 6</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Views that key at all</td><td class="n">25 / 36</td><td class="n">36 / 36</td><td class="n">32 / 36</td></tr>
+      <tr><td class="name">Backdrop behind the subject</td><td class="n bad">no</td><td class="n best">yes</td><td class="n best">yes</td></tr>
+      <tr><td class="name">In focus</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n best">164 vs 6.6</td></tr>
+      <tr><td class="name">Silhouette area ratio</td><td class="n bad">213&times;</td><td class="n">3.7&times;</td><td class="n best">1.9&times;</td></tr>
+      <tr><td class="name">Mask covers the model</td><td class="n">0.781</td><td class="n">0.842</td><td class="n bad">0.795</td></tr>
+      <tr><td class="name">Contribution to the hull</td><td class="n bad">none</td><td class="n bad">0.24%</td><td class="n bad">none</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="col stack">
+    <p>Each run fixed the previous run's blocker. Run 4: the backdrop did not reach behind the subject.
+    Run 5: it did, but mask coverage was too low to carve with. Run 6: it has a proper lens, it is
+    sharp, its silhouettes are consistent &mdash; and the pose still only fits to <b>IoU 0.693</b>.</p>
+    <p>So this run also tested whether it could at least contribute <b>texture</b>, which needs no
+    silhouette at all. The test compares the colour MAIN and cam A each report for the same surface
+    point, with exposure normalised out:</p>
+    <div class="key"><p>Disagreement <b>0.486</b>, against roughly 0.15 where a texture begins to
+    double. Cam A cannot be projected onto this model accurately enough to paint it either.</p></div>
+    <p class="why"><b>What this establishes:</b> the blocker is no longer the mounting, the backdrop,
+    the lens or the focus. It is that a seven-parameter weak-perspective pose fitted from silhouettes
+    is not enough for a wide lens at close range at a steep angle. A calibration target is the one
+    thing that would change the answer, and cam A's data is captured and clean for the moment it
+    exists.</p>
+  </div>
+
+  <div class="stack-s">
+    <div class="label">One thing that did get fixed</div>
+    <figure>
+      <img src="img/fig-cam-a-masks.jpg" loading="lazy" alt="Cam A silhouette masks across the whole rotation">
+      <figcaption>Cam A's masks. The upper lamp throws the subject's shadow onto the backdrop, and the
+      panel's own ragged right-hand edge alternates green and not-green &mdash; both keyed as subject,
+      giving a speckled wing that dragged silhouette areas over a factor of eight. Closing the green
+      mask by 15&nbsp;px before opening it takes that strip from 7.0% non-green to 0.0% and leaves the
+      arm openings, which are far wider. Area ratio 8.1&times; down to 1.9&times;.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <div class="label">Lighting</div>
+    <h2>Ambient is back, and it still wins</h2>
+  </div>
+  <div class="col stack">
+    <p>Every stop is photographed three times: both lamps off, lower lamp only, upper lamp only. On run
+    4 the unlit frames made the best base colour by a distance. On run 5 they were useless &mdash; the
+    room lights were off and they arrived at mean brightness 1.3 out of 255, so the two lamps had to be
+    fused to stand in for them. Here they read <b>42.6</b>, so the good recipe applies again.</p>
+    <p>Structure comes from the ambient bake, which has the flattest illumination of the three and
+    nothing clipped. Colour comes from a lamp bake as three per-channel gains
+    (R&nbsp;0.516, G&nbsp;0.888, B&nbsp;1.596) undoing the room's tungsten cast. Only three numbers
+    cross over, so none of the lamp frames' hard shadows come with them.</p>
+    <p class="why">That the right answer swung from ambient, to a two-lamp fusion, and back to ambient
+    across three runs is not a discovery about photography. It is the room's own lighting behaving as
+    an uncontrolled variable, which is why enclosing the rig sits near the top of the upgrade list.</p>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <div class="label">Photometric stereo</div>
+    <h2>The second lamp, again the thing that paid</h2>
+  </div>
+  <div class="col stack">
+    <p>The lamps sit at <b>&minus;1.1&deg;</b> and <b>+30.6&deg;</b> elevation. Across 36 stops that is
+    72 light directions spanning two elevations instead of one, and the smallest singular value of the
+    accumulated normal equations reaches <b>2.174</b> &mdash; the best of the three runs, after 1.747
+    and 2.043, against <b>0.00</b> with a single lamp, which is structurally unsolvable rather than
+    merely difficult.</p>
+    <p>Normals solve for <b>87%</b> of 2,123,332 texels. Median deviation from the smooth surface is
+    8.3&deg;, with the 90th percentile at 21.0&deg;, after high-passing away the low-frequency bias the
+    raw solve carries.</p>
+  </div>
+  <div class="two">
+    <figure>
+      <img src="img/fig-normal-map.jpg" loading="lazy" alt="The tangent-space normal map, 2048 square">
+      <figcaption>Tangent-space normal map, high-passed to keep the relief and discard the solve's
+      low-frequency bias.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/fig-base-colour.jpg" loading="lazy" alt="The base colour map, 2048 square">
+      <figcaption>Base colour: ambient structure, lamp white balance. Median RGB 157, 130, 74.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <div class="label">The model</div>
+    <h2>What was delivered</h2>
+  </div>
+  <div class="col stack">
+    <p>The standing conventions are applied: the stand and its nails cut away, the bottom capped flat,
+    and the figure scaled so the carving itself is 95&nbsp;mm tall. Both openings under the arms
+    survive, so the mesh is watertight, manifold and genus&nbsp;2 &mdash; the carving's real topology,
+    and the strongest single check that the reconstruction did not quietly fill them in.</p>
+  </div>
+  <div class="scroll"><table>
+    <thead><tr><th>Property</th><th class="n">Value</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Reprojection IoU</td><td class="n best">0.9683</td><td>Against 0.778 and 0.950 on the previous runs</td></tr>
+      <tr><td class="name">Bounding box</td><td class="n">65.6 &times; 95.0 &times; 39.8 mm</td><td>Y-up; height is the scale reference</td></tr>
+      <tr><td class="name">Triangles</td><td class="n">8,530</td><td>4,944 vertices after UV splitting</td></tr>
+      <tr><td class="name">Genus</td><td class="n">2</td><td>Both arm openings preserved</td></tr>
+      <tr><td class="name">Watertight</td><td class="n">yes</td><td>Manifold, consistently wound</td></tr>
+      <tr><td class="name">Volume</td><td class="n">71.1 cm&sup3;</td><td>Visual hull &mdash; an upper bound, not a measurement</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="stack-s">
+    <div class="label">Files</div>
+    <p class="why" style="font-size:.94rem;color:var(--ink-2)">Every file is a plain download; nothing is behind a login.</p>
+    <div class="files" id="files">
+      <a class="file" href="files/fasting-buddha.glb" download><code>fasting-buddha.glb</code><span>Textured model with base colour and normal map. Y-up.</span><span class="size">5.2 MB</span></a>
+      <a class="file" href="files/fasting-buddha.obj" download><code>fasting-buddha.obj</code><span>Same geometry and UVs, with its <code>.mtl</code>.</span><span class="size">776 KB</span></a>
+      <a class="file" href="files/fasting-buddha-solid.stl" download><code>fasting-buddha-solid.stl</code><span>Geometry only, <b>Z-up</b> &mdash; stands upright in slicers and CAD.</span><span class="size">427 KB</span></a>
+      <a class="file" href="files/fasting-buddha-texture.png" download><code>fasting-buddha-texture.png</code><span>Base colour: ambient structure, lamp white balance.</span><span class="size">2.7 MB</span></a>
+      <a class="file" href="files/fasting-buddha-normal.png" download><code>fasting-buddha-normal.png</code><span>Tangent-space relief from the two-lamp solve.</span><span class="size">2.2 MB</span></a>
+      <a class="file" href="files/fasting-buddha-alt-lamp-lit.png" download><code>fasting-buddha-alt-lamp-lit.png</code><span>An alternative, lamp-lit base colour, kept for comparison.</span><span class="size">3.1 MB</span></a>
+      <a class="file" href="files/fasting-buddha.mtl" download><code>fasting-buddha.mtl</code><span>Material file for the OBJ.</span><span class="size">140 bytes</span></a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="head">
+    <div class="label">Next</div>
+    <h2>What would actually move the number</h2>
+  </div>
+  <div class="col stack">
+    <p><b>Calibrate cam A.</b> Three runs have now removed every other objection to it. A checkerboard
+    or ChArUco target on the stage, giving real intrinsics including radial distortion, is the only
+    remaining thing between this rig and a second elevation &mdash; which simulation puts at 23.6% hull
+    excess down to 10.2%.</p>
+    <p><b>Enclose the rig.</b> The correct colour source and the correct ruler exposure have both
+    changed between sessions purely because of room lighting. That is not a variable worth leaving to
+    a light switch.</p>
+    <p><b>A caliper across the carving's width.</b> Height is still the only dimension tied to a
+    measurement; width and depth are whatever the hull produced.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Reconstructed from a single 496-second capture on a Raspberry&nbsp;Pi turntable rig, homed on the
+  rim ruler before the first stop: 36 stops, 38,851 steps per revolution, IMX477 main camera, a UVC
+  camera above it, and a second UVC camera reading the ruler. Silhouettes green-keyed, shape from
+  visual hull carving on a 260&times;380&times;260 grid, surface relief from two-lamp photometric
+  stereo with measured ambient subtraction.</p>
+  <p style="margin-top:14px">An earlier version of this page reported run 4's reprojection IoU as
+  0.838. That was measured without the principal point being set &mdash; it lives in module state
+  rather than in an argument, so scoring silently used a camera the capture never had. The correct
+  figure is <b>0.778</b>.</p>
+  <p style="margin-top:14px">This page is the published version of the write-up. The rig&rsquo;s code, this site&rsquo;s source and the export files are in the <a href="https://github.com/llama-with-thumbs/plant_imaging_rig">plant_imaging_rig</a> repository. Page updated 24 September 2026.</p>
+</footer>
+
 </div>
 
 <script>
-  const REFRESH_MS = 60000;
 
-  function ago(iso) {
-    const then = new Date(iso);
-    if (isNaN(then)) return iso;
-    const secs = Math.max(0, (Date.now() - then) / 1000);
-    if (secs < 90) return Math.round(secs) + "s ago";
-    if (secs < 5400) return Math.round(secs / 60) + " min ago";
-    if (secs < 172800) return Math.round(secs / 3600) + " h ago";
-    return Math.round(secs / 86400) + " days ago";
+/* Reading controls.
+   Which adjustment helps is personal, so all three are the reader's to set rather
+   than mine to guess. Size and spacing are written as custom properties on the root
+   element, which every rule already sizes off; the tint is a data attribute so the
+   stylesheet does the work and nothing has to be recoloured by hand. */
+(function(){
+  var root = document.documentElement;
+  var SIZES = [16, 17, 18, 20, 22, 25];
+  var size = 2;
+  var SPACE = [
+    {tracking:".012em", wording:".07em", leading:"1.7"},
+    {tracking:".045em", wording:".16em", leading:"1.9"},
+    {tracking:".08em",  wording:".28em", leading:"2.1"}
+  ];
+
+  function applySize(){ root.style.setProperty("--size", SIZES[size] + "px"); }
+  function applySpace(i){
+    root.style.setProperty("--tracking", SPACE[i].tracking);
+    root.style.setProperty("--wording", SPACE[i].wording);
+    root.style.setProperty("--leading", SPACE[i].leading);
+  }
+  applySize();
+
+  function group(sel, fn){
+    var btns = [].slice.call(document.querySelectorAll(sel));
+    btns.forEach(function(b){
+      b.addEventListener("click", function(){
+        btns.forEach(function(o){ o.setAttribute("aria-pressed", String(o === b)); });
+        fn(b);
+      });
+    });
   }
 
-  async function refresh() {
-    const bust = "?t=" + Date.now();
-    let hasRuler = true;
-    try {
-      const meta = await fetch("meta.json" + bust, { cache: "no-store" }).then(r => r.json());
-      document.getElementById("captured").textContent =
-        ago(meta.captured) + "  (" + meta.captured.replace("T", " ") + ")";
-      document.getElementById("angle").textContent =
-        meta.angle == null ? "—" : meta.angle.toFixed(1) + "°";
-      document.getElementById("cycle").textContent =
-        meta.cycle == null ? "—" : "#" + meta.cycle;
-      document.getElementById("camera").textContent = meta.camera || "—";
-      document.title = "Plant Imaging Rig — " + ago(meta.captured);
-      if (meta.has_ruler === false) hasRuler = false;
-    } catch (e) {
-      /* meta.json may not exist yet; the images alone still work */
-    }
-    document.getElementById("shot").src = "latest.jpg" + bust;
-    const card = document.getElementById("rulerCard");
-    if (hasRuler) document.getElementById("ruler").src = "ruler.jpg" + bust;
-    else card.hidden = true;
-  }
-
-  // Only reveal the position card once its image actually loads, so a site
-  // published before the second camera existed does not show a broken frame.
-  document.getElementById("ruler").addEventListener("load", () => {
-    document.getElementById("rulerCard").hidden = false;
+  document.querySelectorAll("[data-size]").forEach(function(b){
+    b.addEventListener("click", function(){
+      size = Math.max(0, Math.min(SIZES.length - 1, size + (b.dataset.size === "+1" ? 1 : -1)));
+      applySize();
+    });
   });
-  document.getElementById("ruler").addEventListener("error", () => {
-    document.getElementById("rulerCard").hidden = true;
+  group("[data-space]", function(b){ applySpace(parseInt(b.dataset.space, 10)); });
+  group(".sw", function(b){
+    if (b.dataset.tint) root.setAttribute("data-tint", b.dataset.tint);
+    else root.removeAttribute("data-tint");
   });
+})();
 
-  refresh();
-  setInterval(refresh, REFRESH_MS);
+</script>
+<script src="viewer.js"></script>
+<script>
+
+(function(){
+  var sync;
+  var ctl = window.initViewer({
+    canvas: "stage", note: "vnote",
+    hint: "Drag to rotate \u00b7 scroll to zoom \u00b7 arrow keys and space also work",
+    verts: 4944, tris: 8530, radius: 57.59,
+    geometry: "model/fasting-buddha.bin",
+    base: "model/base.jpg",
+    normal: "model/normal.jpg",
+    onInteract: function(){ if (sync) sync(); }
+  });
+  sync = window.wireViewer(ctl, { spin: "vspin", reset: "vreset", relief: "vrelief", exposure: "vexp" });
+})();
+
 </script>
 </body>
 </html>
