@@ -208,6 +208,16 @@ ul.steps li::marker{color:var(--screen)}
 .sitenav a:focus-visible{outline:2px solid var(--screen); outline-offset:2px}
 a.file{text-decoration:none; color:inherit}
 a.file:hover code{color:var(--screen)}
+/* the rig diagram */
+#rstage{display:block; width:100%; height:clamp(420px,62vh,640px); touch-action:none; cursor:grab}
+#rstage:active{cursor:grabbing}
+#rstage:focus-visible{outline:2px solid var(--screen); outline-offset:-2px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;
+  font-size:.9rem;color:var(--ink-2);max-width:78ch}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:13px;height:13px;border-radius:3px;display:inline-block;
+  border:1px solid color-mix(in srgb,var(--ink) 22%,transparent)}
+td.rank{font-weight:700; color:var(--muted); white-space:nowrap}
 
 </style>
 </head>
@@ -258,7 +268,7 @@ a.file:hover code{color:var(--screen)}
   <nav class="sitenav" aria-label="Site">
     <a href="model.html">3D model on its own page</a>
     <a href="#files">Download the model</a>
-    <a href="rig.html">The rig itself: geometry and upgrade list</a>
+    <a href="#rig">The rig itself</a>
     <a href="live.html">Live view</a>
     <a href="models.html">Earlier: bottle models</a>
     <a href="https://github.com/llama-with-thumbs/plant_imaging_rig">Code on GitHub</a>
@@ -542,7 +552,113 @@ never had. Rotate to the front and you can see through both openings under the a
     a light switch.</p>
     <p><b>A caliper across the carving's width.</b> Height is still the only dimension tied to a
     measurement; width and depth are whatever the hull produced.</p>
-    <p>The measured geometry behind these three, and the full ranked upgrade list, are on <a href="rig.html">the rig page</a>.</p>
+    <p>The measured geometry behind these three, and the full ranked upgrade list, are in <a href="#rig">the section below</a>.</p>
+  </div>
+</section>
+
+
+<section id="rig">
+  <div class="head">
+    <div class="label">The rig itself</div>
+    <h2>What the rig can and cannot see</h2>
+    <p class="lede">A working model of the machine, built from measurements where they exist and
+    from photographs where they do not. It answers one question with a number instead of an
+    argument: does each camera actually have a backdrop behind the subject.</p>
+  </div>
+
+  <div class="viewer">
+    <canvas id="rstage" aria-label="Interactive 3D diagram of the imaging rig. Drag to rotate, scroll to zoom, arrow keys also work."></canvas>
+    <div class="vbar">
+      <div class="vhint" id="rnote">Loading the rig&hellip;</div>
+      <div class="vctl">
+        <label>Brightness
+          <input type="range" id="rexp" min="0.7" max="2.4" step="0.05" value="1.25">
+        </label>
+        <button type="button" id="rrays" aria-pressed="true">Sight lines</button>
+        <button type="button" id="rspin" aria-pressed="true">Pause</button>
+        <button type="button" id="rreset">Reset</button>
+      </div>
+    </div>
+  </div>
+  <div class="legend" style="margin-top:14px">
+  <span><i style="background:#F2B840"></i> main camera</span>
+  <span><i style="background:#59B3F2"></i> cam A, the upper one</span>
+  <span><i style="background:#D866BF"></i> cam B, reads the ruler</span>
+  <span><i style="background:#FFDB8C"></i> lower lamp</span>
+  <span><i style="background:#FABF66"></i> upper lamp</span>
+  <span><i style="background:#F28C40"></i> the room's own lamp</span>
+  <span><i style="background:#CC4040"></i> what a turntable can never reach</span>
+  <span><i style="background:#2A8C47"></i> backdrop and platter top</span>
+</div>
+  <p style="font-size:.92rem;color:var(--ink-2);max-width:64ch">
+  Each camera is drawn with the wedge it sees, out to the backdrop plane. The red cone on the
+  subject&rsquo;s head is the set of surface directions no camera on this rig will ever face
+  squarely: with the highest camera at 39.5&deg;, anything tilted more than 50.5&deg; from
+  vertical is only ever seen obliquely. Millimetres, Y up, origin on the platter at the axis.</p>
+
+  <div class="stack-s">
+    <div class="label">Measured, and merely plausible</div>
+    <div class="scroll"><table>
+      <thead><tr><th>Quantity</th><th class="n">Value</th><th>Where it came from</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Main camera to axis</td><td class="n">340 mm</td><td>Solved in the carve</td></tr>
+        <tr><td class="name">Main camera elevation</td><td class="n">1.16&deg;</td><td>Measured pitch; level with the subject</td></tr>
+        <tr><td class="name">Cam A elevation</td><td class="n">39.5&deg;</td><td>Registering the main camera&rsquo;s hull against cam A&rsquo;s pictures</td></tr>
+        <tr><td class="name">Lamp elevations</td><td class="n">4.4&deg; and 35.9&deg;</td><td>Photometric solve on run 5. Run 6 solved &minus;1.1&deg; and 30.6&deg; with the lamps unmoved, so the spread is the solve&rsquo;s own uncertainty</td></tr>
+        <tr><td class="name">Turntable diameter</td><td class="n">121.0 mm</td><td>A 380 mm ruler wraps it exactly once</td></tr>
+        <tr><td class="name">Subject and pedestal</td><td class="n">95 / 85.6 mm</td><td>Measured by hand</td></tr>
+        <tr><td class="name">Steps per revolution</td><td class="n">38,851</td><td>Calibrated over ten revolutions</td></tr>
+        <tr><td class="name bad">Backdrop size and distance</td><td class="n bad">300 &times; 400 mm, 150 mm back</td><td class="bad">Scaled off the photographs</td></tr>
+        <tr><td class="name bad">Cam A and cam B distances</td><td class="n bad">320 / 240 mm</td><td class="bad">Cam B implied by 6.18 px/mm; cam A eyeballed</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="col stack">
+    <div class="label">The backdrop is 20 mm too short</div>
+    <p>Cameras and backdrop are bolted to the same frame; only the subject turns. So a camera either
+    has the panel behind the whole cylinder the subject sweeps out, at every rotation, or it never
+    does. One geometric test per camera, measured at the panel&rsquo;s own plane:</p>
+  </div>
+  <div class="scroll"><table>
+    <thead><tr><th>Camera</th><th class="n">Side margin</th><th class="n">Above</th><th class="n">Below</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="name">MAIN</td><td class="n">+102 mm</td><td class="n">+161 mm</td><td class="n">+102 mm</td><td class="best">Covered, comfortably</td></tr>
+      <tr><td class="name">Cam A</td><td class="n">+102 mm</td><td class="n">+281 mm</td><td class="n bad">&minus;20 mm</td><td class="bad">Room visible below the subject</td></tr>
+      <tr><td class="name">Cam B</td><td class="n">+96 mm</td><td class="n">+59 mm</td><td class="n">+187 mm</td><td class="best">Covered</td></tr>
+    </tbody>
+  </table></div>
+  <div class="col stack">
+    <div class="key"><p>The model predicts the failure that was actually observed, at the end it was
+    observed at. That is the only reason to trust anything else it says.</p></div>
+    <p>Cam A looks down at 39.5&deg;, and its sight line past the base of the subject lands 20 mm
+    below the panel&rsquo;s lower edge. That is where two of its 36 masks came back truncated. For a
+    panel 150 mm behind the axis, the bottom edge must reach +65 mm above the platter for a level
+    camera, &minus;22 mm at 30&deg;, <b>&minus;61 mm at 40&deg;</b> and &minus;195 mm at 60&deg;.
+    The present panel spans &minus;40 to +360 mm: far taller than needed at the top, short at the
+    bottom.</p>
+  </div>
+
+  <div class="stack-s">
+    <div class="label">The upgrade list, ranked by what the rig has been measured to get wrong</div>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Change</th><th>The measurement behind it</th></tr></thead>
+      <tbody>
+        <tr><td class="rank">1</td><td class="name">Backlit cyclorama, from 200 mm below the platter to 250 mm above</td><td>Cam A is 20 mm short of backdrop and contributes 0.24%. A neutral panel also removes the green bounce that left the albedo with red minus green of 34.4.</td></tr>
+        <tr><td class="rank">2</td><td class="name">A real calibration target (ChArUco board or cube)</td><td>With the backdrop fixed, cam A still only reached 0.842 mask coverage. The 7-parameter pose model is the blocker now.</td></tr>
+        <tr><td class="rank">3</td><td class="name">Enclose the rig</td><td>Unlit frames went from mean brightness 36.0 to 1.3 between runs because of a room light switch, and the colour recipe changed with them.</td></tr>
+        <tr><td class="rank">4</td><td class="name">Closed-loop rotary stage, encoder on the output shaft</td><td>About 1&deg; of backlash, and one move that delivered 300 of 3,353 steps. Ruler homing catches it (0.285&deg;) but does not remove it.</td></tr>
+        <tr><td class="rank">5</td><td class="name">Motorised elevation for the second camera</td><td>Hull excess 23.6% to 10.2% with one ring at 30&deg;. Cannot pay until 1 and 2 are done.</td></tr>
+        <tr><td class="rank">6</td><td class="name">Cross-polarisation on lamps and lenses</td><td>Specular highlights forced a 97th-percentile cap in the photometric solve and blew out the ruler tape.</td></tr>
+        <tr><td class="rank">7</td><td class="name">Structured-light projector</td><td>The only item that addresses concavity, which silhouettes cannot reach at any elevation. A change of method, not an upgrade.</td></tr>
+        <tr><td class="rank">8</td><td class="name">A scale reference and a non-occluding mount</td><td>Height is the only dimension tied to a measurement; the five pins occlude the base and force the flat-bottom convention.</td></tr>
+      </tbody>
+    </table></div>
+    <p style="font-size:.92rem;color:var(--ink-2);max-width:64ch">Items 1 to 3 remove measured
+    blockers; 4 and 5 unlock a measured gain that is currently unreachable; 6 to 8 are real
+    improvements that do not depend on anything else. The coverage test assumes the subject&rsquo;s
+    swept cylinder, 33 mm radius and 95 mm tall on an 85.6 mm pedestal, and a backdrop 150 mm behind
+    the axis.</p>
   </div>
 </section>
 
@@ -625,6 +741,35 @@ never had. Rotate to the front and you can see through both openings under the a
     onInteract: function(){ if (sync) sync(); }
   });
   sync = window.wireViewer(ctl, { spin: "vspin", reset: "vreset", relief: "vrelief", exposure: "vexp" });
+})();
+
+</script>
+<script src="rig-viewer.js"></script>
+<script>
+
+(function(){
+  var ctl = window.initRig({
+    canvas:"rstage", note:"rnote",
+    hint:"Drag to rotate \u00b7 scroll to zoom \u00b7 arrow keys and space also work",
+    verts:2162, tris:3774, solid:3616, radius:642.97,
+    geometry:"model/rig.bin"
+  });
+  if (!ctl) return;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var spinning = !reduced, rays = true;
+  var spinBtn = document.getElementById("rspin"), raysBtn = document.getElementById("rrays");
+  function syncSpin(){ spinBtn.textContent = spinning ? "Pause" : "Spin"; spinBtn.setAttribute("aria-pressed", String(spinning)); }
+  syncSpin();
+  spinBtn.addEventListener("click", function(){ spinning = !spinning; ctl.spin(spinning); syncSpin(); });
+  raysBtn.addEventListener("click", function(){ rays = !rays; ctl.rays(rays); raysBtn.setAttribute("aria-pressed", String(rays)); });
+  document.getElementById("rreset").addEventListener("click", function(){ ctl.reset(); spinning = !reduced; syncSpin(); });
+  document.getElementById("rexp").addEventListener("input", function(){ ctl.exposure(parseFloat(this.value)); });
+  var stage = document.getElementById("rstage");
+  stage.addEventListener("pointerdown", function(){ spinning = false; syncSpin(); });
+  stage.addEventListener("keydown", function(e){
+    if (e.key === " ") { spinning = !spinning; syncSpin(); }
+    else if (e.key.indexOf("Arrow") === 0) { spinning = false; syncSpin(); }
+  });
 })();
 
 </script>
