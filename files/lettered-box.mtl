@@ -1,0 +1,9 @@
+newmtl wood
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.06 0.06 0.06
+Ns 18
+d 1
+illum 2
+map_Kd lettered-box-texture.png
+norm lettered-box-normal.png

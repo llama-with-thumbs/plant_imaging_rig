@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lettered Box &middot; 3D model</title>
+<meta name="description" content="Interactive 3D model of a lettered box, reconstructed on a Raspberry Pi turntable rig. Drag to rotate, scroll to zoom, arrow keys also work.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127793;</text></svg>">
+<style>
+:root{
+  color-scheme:light dark;
+  --paper:#EFEEE7; --card:#F8F7F1; --ink:#282B26; --ink-2:#464B42; --muted:#6B7165;
+  --rule:#D6D6CB; --rule-2:#E4E4D9; --screen:#2C6A45; --screen-bg:#E1EDE5;
+  --shadow:0 1px 2px rgba(22,26,20,.05),0 8px 28px -14px rgba(22,26,20,.22);
+  --sans:Verdana,"DejaVu Sans",Tahoma,"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#161813; --card:#1E211B; --ink:#E2E5DA; --ink-2:#BFC5B7; --muted:#919786;
+    --rule:#2F332A; --rule-2:#262A22; --screen:#77C595; --screen-bg:#16271D;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#161813; --card:#1E211B; --ink:#E2E5DA; --ink-2:#BFC5B7; --muted:#919786;
+  --rule:#2F332A; --rule-2:#262A22; --screen:#77C595; --screen-bg:#16271D;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans);
+  font-size:18px; line-height:1.6; letter-spacing:.012em; word-spacing:.07em;
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; min-height:100%;
+}
+a{color:var(--screen)}
+.wrap{width:100%; max-width:1140px; margin:0 auto; padding:0 16px 28px; display:flex; flex-direction:column; gap:14px; flex:1}
+header{padding-top:22px; display:flex; flex-wrap:wrap; gap:6px 24px; align-items:baseline; justify-content:space-between}
+h1{margin:0; font-size:clamp(1.35rem,3vw,1.75rem); font-weight:700; line-height:1.25}
+.sub{margin:0; color:var(--ink-2); font-size:.95rem}
+nav{display:flex; flex-wrap:wrap; gap:8px}
+nav a{font-size:.85rem; letter-spacing:0; word-spacing:0; text-decoration:none; color:var(--ink-2);
+  padding:5px 12px; min-height:32px; display:inline-flex; align-items:center; border-radius:6px;
+  border:1px solid var(--rule); background:var(--card)}
+nav a:hover{border-color:var(--screen); color:var(--screen)}
+nav a:focus-visible{outline:2px solid var(--screen); outline-offset:2px}
+
+.viewer{border:1px solid var(--rule); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);
+  background:radial-gradient(120% 95% at 50% 4%, color-mix(in srgb,var(--screen) 8%,var(--card)) 0%, var(--card) 62%);
+  display:flex; flex-direction:column; flex:1; min-height:0}
+#stage{display:block; width:100%; flex:1; min-height:min(60vh, 460px); height:calc(100vh - 250px); max-height:900px; touch-action:none; cursor:grab}
+#stage:active{cursor:grabbing}
+#stage:focus-visible{outline:2px solid var(--screen); outline-offset:-2px}
+.vbar{display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; justify-content:space-between;
+  padding:12px 16px; border-top:1px solid var(--rule); background:var(--card)}
+.vhint{font-size:.9rem; color:var(--ink-2)}
+.vctl{display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center}
+.vctl label{display:flex; align-items:center; gap:9px; font-size:.82rem; letter-spacing:0; word-spacing:0; color:var(--muted)}
+.vctl input[type=range]{width:106px; accent-color:var(--screen)}
+.vctl button{font:inherit; font-size:.8rem; padding:5px 13px; min-height:32px; border-radius:6px; cursor:pointer;
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink-2)}
+.vctl button:hover{border-color:var(--screen); color:var(--screen)}
+.vctl button[aria-pressed="true"]{border-color:var(--screen); color:var(--screen); background:var(--screen-bg); font-weight:700}
+.vctl button:focus-visible{outline:2px solid var(--screen); outline-offset:2px}
+
+.facts{display:flex; flex-wrap:wrap; gap:6px 22px; font-size:.9rem; color:var(--ink-2); margin:0}
+.facts b{color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums}
+footer{font-size:.88rem; color:var(--muted); max-width:70ch}
+footer p{margin:0}
+@media (max-width:640px){ #stage{height:auto; min-height:min(62vh, 480px)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>The lettered box, reconstructed</h1>
+      <p class="sub">Interactive 3D model of the carving. Drag to rotate, scroll to zoom, arrow keys also work.</p>
+    </div>
+    <nav aria-label="Site">
+      <a href="./">The write-up</a>
+      <a href="model.html">The Buddha model</a>
+      <a href="files/lettered-box.glb" download>Download GLB</a>
+      <a href="files/lettered-box-solid.stl" download>Download STL</a>
+    </nav>
+  </header>
+
+  <div class="viewer">
+    <canvas id="stage" aria-label="Interactive 3D model of the carving. Drag to rotate, scroll to zoom, arrow keys also work."></canvas>
+    <div class="vbar">
+      <div class="vhint" id="vnote">Loading the model&hellip;</div>
+      <div class="vctl">
+        <label>Relief
+          <input type="range" id="vrelief" min="0" max="2.2" step="0.05" value="1">
+        </label>
+        <label>Exposure
+          <input type="range" id="vexp" min="0.7" max="2.6" step="0.05" value="1.45">
+        </label>
+        <button type="button" id="vspin" aria-pressed="true">Pause</button>
+        <button type="button" id="vreset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="facts">
+    <span><b>103 &times; 76 &times; 104 mm</b>, scale inherited from the camera</span>
+    <span><b>11,880</b> triangles</span>
+    <span>genus <b>0</b>, watertight</span>
+    <span>reprojection IoU <b>0.928</b></span>
+    <span>captured <b>29 September 2026</b></span>
+  </p>
+
+  <footer>
+    <p>Shape from 36 green-keyed silhouettes of the main camera, colour from the two lamp passes, relief from
+    two-lamp photometric stereo. Surfaces no camera saw, mostly the top face, are painted a flat colour. The
+    box is the second subject on this rig; the first, the carved Buddha, has <a href="model.html">its own page</a>.</p>
+  </footer>
+</div>
+
+<script src="viewer.js"></script>
+<script>
+(function(){
+  var sync;
+  var ctl = window.initViewer({
+    canvas: "stage", note: "vnote",
+    hint: "Drag to rotate · scroll to zoom · arrow keys and space also work",
+    verts: 8953, tris: 11880, radius: 66.86,
+    geometry: "model/lettered-box.bin",
+    base: "model/lettered-box-base.jpg",
+    normal: "model/lettered-box-normal.jpg",
+    onInteract: function(){ if (sync) sync(); }
+  });
+  sync = window.wireViewer(ctl, { spin: "vspin", reset: "vreset", relief: "vrelief", exposure: "vexp" });
+})();
+</script>
+</body>
+</html>
