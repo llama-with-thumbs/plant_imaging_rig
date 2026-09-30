@@ -105,15 +105,15 @@ footer p{margin:0}
   </div>
 
   <p class="facts">
-    <span><b>103 &times; 76 &times; 104 mm</b>, scale inherited from the camera</span>
-    <span><b>11,880</b> triangles</span>
+    <span><b>88 &times; 89 &times; 91 mm</b>, the box&rsquo;s own dimensions, scale inherited from the camera</span>
+    <span><b>12,066</b> triangles</span>
     <span>genus <b>0</b>, watertight</span>
-    <span>reprojection IoU <b>0.928</b></span>
-    <span>captured <b>29 September 2026</b></span>
+    <span>reprojection IoU <b>0.947</b></span>
+    <span>captured <b>30 September 2026</b>, both cameras</span>
   </p>
 
   <footer>
-    <p>Shape from 36 green-keyed silhouettes of the main camera, colour from the two lamp passes, relief from
+    <p>Shape from 36 green-keyed silhouettes of the main camera, trimmed at the top edges by the upper camera, colour from the two lamp passes, relief from
     two-lamp photometric stereo. Surfaces no camera saw, mostly the top face, are painted a flat colour. The
     box is the second subject on this rig; the first, the carved Buddha, has <a href="model.html">its own page</a>.</p>
   </footer>
@@ -126,7 +126,7 @@ footer p{margin:0}
   var ctl = window.initViewer({
     canvas: "stage", note: "vnote",
     hint: "Drag to rotate · scroll to zoom · arrow keys and space also work",
-    verts: 8953, tris: 11880, radius: 66.86,
+    verts: 8651, tris: 12066, radius: 68.46,
     geometry: "model/lettered-box.bin",
     base: "model/lettered-box-base.jpg",
     normal: "model/lettered-box-normal.jpg",
