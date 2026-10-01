@@ -220,6 +220,15 @@ a.file:hover code{color:var(--screen)}
 td.rank{font-weight:700; color:var(--muted); white-space:nowrap}
 
 </style>
+
+
+
+<style>
+.sketches{gap:1em}
+.sketch-one{max-width:560px}
+.sketch-one svg,
+.sketches svg{background:var(--card); border:2px solid var(--rule); border-radius:8px; padding:6px; color:var(--ink)}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -270,6 +279,7 @@ td.rank{font-weight:700; color:var(--muted); white-space:nowrap}
     <a href="box.html">New: the lettered box, 3D model</a>
     <a href="#files">Download the model</a>
     <a href="#rig">The rig itself</a>
+    <a href="#lights">Where to put the lights</a>
     <a href="live.html">Live view</a>
     <a href="models.html">Earlier: bottle models</a>
     <a href="https://github.com/llama-with-thumbs/plant_imaging_rig">Code on GitHub</a>
@@ -639,6 +649,277 @@ never had. Rotate to the front and you can see through both openings under the a
     The present panel spans &minus;40 to +360 mm: far taller than needed at the top, short at the
     bottom.</p>
   </div>
+
+
+
+
+
+
+<!-- lighting-recommendations:start -->
+<div class="stack" id="lights">
+  <div class="head">
+    <div class="label">Recommendations</div>
+    <h3>Where to put the lights, with the cameras and the subject where they are</h3>
+    <p>The cameras, the platter and the panel stay where they are. Only the two lamp bars move, and
+    they move to a different place for each of the three things a capture has to deliver. Every
+    recommendation below follows from a measurement already on this page or in the write-up above.</p>
+  </div>
+
+  <div class="stack-s">
+    <div class="label">As it is</div>
+    <div class="two sketches"><svg viewBox="0 0 520 430" role="img" aria-label="Plan of the rig as it is: both lamp bars twenty degrees either side of the camera axis, lighting subject and panel together" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<path d="M319.8 364.3 L173.6 201.9 L327.4 145.9 Z" fill="#FFDB8C" opacity="0.33"/>
+<line x1="254.9" y1="387.9" x2="384.6" y2="340.7" stroke="#FFDB8C" stroke-width="7.0" stroke-linecap="round"/>
+<line x1="254.9" y1="387.9" x2="384.6" y2="340.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+<path d="M200.2 364.3 L192.6 145.9 L346.4 201.9 Z" fill="#FABF66" opacity="0.33"/>
+<line x1="135.4" y1="340.7" x2="265.1" y2="387.9" stroke="#FABF66" stroke-width="7.0" stroke-linecap="round"/>
+<line x1="135.4" y1="340.7" x2="265.1" y2="387.9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+<rect x="191.0" y="128.5" width="138.0" height="5.0" rx="1" fill="#2A8C47" stroke="#2A8C47" stroke-width="1.4" opacity="1.00"/>
+<text x="337.0" y="135.0" text-anchor="start" font-size="12" fill="currentColor">panel, dark</text>
+<circle cx="260.0" cy="200.0" r="27.8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+<circle cx="260.0" cy="200.0" r="15.2" fill="var(--card)" stroke="currentColor" stroke-width="1.4"/>
+<text x="260.0" y="204.0" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<path d="M260.0 356.4 L217.0 135.1 L303.0 135.1 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="250.0" y="349.4" width="20.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="250.0" y="367.4" width="20.0" height="10.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="260.0" y="396.4" text-anchor="middle" font-size="12" fill="currentColor">main camera, cam A above it</text>
+<text x="359.8" y="322.3" text-anchor="middle" font-size="12" fill="currentColor">lower lamp, 20&#176; right</text>
+<text x="160.2" y="322.3" text-anchor="middle" font-size="12" fill="currentColor">upper lamp, 20&#176; left</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">now, from above</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">both beams reach the panel, and green bounces back</text>
+<text x="12.0" y="62.0" text-anchor="start" font-size="12" fill="currentColor">a 300 mm bar at 380 mm spans 43&#176;; its mirror image hits the lens</text>
+</svg><svg viewBox="0 0 520 300" role="img" aria-label="Side view as it is: the lower lamp level with the main camera, the upper lamp right beside cam A" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<line x1="142.2" y1="262.0" x2="197.8" y2="262.0" stroke="currentColor" stroke-width="3.0" stroke-linecap="round"/>
+<rect x="159.0" y="222.6" width="22.1" height="39.4" rx="2" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="154.8" y="178.9" width="30.4" height="43.7" rx="4" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="170.0" y="204.8" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<line x1="101.0" y1="280.4" x2="101.0" y2="96.4" stroke="#2A8C47" stroke-width="5.0" stroke-linecap="round"/>
+<text x="95.0" y="188.4" text-anchor="end" font-size="12" fill="currentColor">panel</text>
+<path d="M326.4 200.8 L103.8 236.1 L103.8 165.6 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="315.4" y="193.8" width="22.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="341.4" y="204.8" text-anchor="start" font-size="12" fill="currentColor">main</text>
+<path d="M317.2 79.5 L146.5 272.3 L95.3 210.1 Z" fill="#59B3F2" opacity="0.14"/>
+<rect x="306.2" y="72.5" width="22.0" height="14.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="302.2" y="83.5" text-anchor="end" font-size="12" fill="currentColor">cam A, 39.5&#176;</text>
+<path d="M334.3 187.4 L167.0 257.3 L157.8 145.6 Z" fill="#FFDB8C" opacity="0.33"/>
+<rect x="323.3" y="176.4" width="22.0" height="22.0" rx="2" fill="#FFDB8C" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="350.3" y="191.4" text-anchor="start" font-size="12" fill="currentColor">lower lamp, 4&#176;</text>
+<path d="M334.3 74.3 L205.4 262.5 L119.4 150.8 Z" fill="#FABF66" opacity="0.33"/>
+<rect x="323.3" y="63.3" width="22.0" height="22.0" rx="2" fill="#FABF66" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="350.3" y="78.3" text-anchor="start" font-size="12" fill="currentColor">upper lamp, 36&#176;</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">now, from the side</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">lower lamp 4&#176;, upper lamp 36&#176;: a good spread in height</text>
+<text x="12.0" y="62.0" text-anchor="start" font-size="12" fill="currentColor">but each lamp sits beside a camera, at that camera&#8217;s angle</text>
+</svg></div>
+    <p class="col">Both bars stand on the camera side, 20&deg; either side of the axis, one level with the
+    main camera and one beside cam A. That arrangement was chosen for photometric stereo, and it did
+    make the solve work. It is also the arrangement behind three measured problems: green bounce from
+    the lit panel left the albedo with red minus green of 34.4; the lower lamp clipped 0.65% of the
+    colour frames; and the metallic box came back with reflection tunnels, genus 4 before filling.</p>
+  </div>
+
+  <div class="stack-s">
+    <div class="label">The glare, worked out</div>
+    <div class="sketch-one"><svg viewBox="0 0 520 345" role="img" aria-label="Plan of the glare: a face turned to the camera reflects the right-hand lamp bar into the lens, because the bar spans more than its own offset" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<line x1="220.0" y1="110.0" x2="300.0" y2="110.0" stroke="currentColor" stroke-width="5.0" stroke-linecap="round"/>
+<text x="260.0" y="100.0" text-anchor="middle" font-size="12" fill="currentColor">a flat face turned to the camera</text>
+<rect x="250.0" y="259.4" width="20.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="244.0" y="270.4" text-anchor="end" font-size="12" fill="currentColor">camera, 0&#176;</text>
+<line x1="254.9" y1="297.9" x2="384.6" y2="250.7" stroke="#FFDB8C" stroke-width="7.0" stroke-linecap="round"/>
+<line x1="254.9" y1="297.9" x2="384.6" y2="250.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+<text x="319.8" y="316.3" text-anchor="middle" font-size="12" fill="currentColor">bar, centre at 20&#176;, ends at &#8722;1&#176; and 42&#176;</text>
+<line x1="254.9" y1="297.9" x2="260.0" y2="110.0" stroke="#FABF66" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="5 4"/>
+<line x1="260.0" y1="110.0" x2="265.1" y2="297.9" stroke="#CC4040" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="5 4"/>
+<line x1="384.6" y1="250.7" x2="260.0" y2="110.0" stroke="#FABF66" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="5 4"/>
+<line x1="260.0" y1="110.0" x2="135.4" y2="250.7" stroke="#CC4040" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="5 4"/>
+<line x1="265.1" y1="297.9" x2="135.4" y2="250.7" stroke="#CC4040" stroke-width="5.0" stroke-linecap="round" stroke-dasharray="6 5" opacity="0.70"/>
+<text x="200.2" y="334.3" text-anchor="middle" font-size="12" fill="#CC4040">mirror image of the bar: it covers the lens</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">why the box came back with tunnels</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">the near end of the bar mirrors to within 1&#176; of the lens</text>
+</svg></div>
+    <p class="col">A flat face turned to a camera reflects a lamp at azimuth <b>a</b> to azimuth
+    <b>&minus;a</b>. A bar centred at 20&deg; would miss the lens, but the bar is 300 mm long at 380 mm,
+    so it spans 43&deg;: its near end sits at &minus;1&deg; and its reflection lands in the lens. The same
+    holds for the upper lamp and cam A. Any lamp must be far enough off the axis that its <b>whole
+    length</b>, mirrored, clears the camera: at 380 mm that means a bar centre beyond 45&deg;, or a bar
+    masked down to a short window.</p>
+  </div>
+
+  <div class="stack-s">
+    <div class="label">1. For shape</div>
+    <div class="two sketches"><svg viewBox="0 0 520 420" role="img" aria-label="Plan for silhouettes: two lamps beside the panel, aimed across it, with flags keeping light off the subject" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<rect x="191.0" y="128.5" width="138.0" height="5.0" rx="1" fill="#7FD69A" stroke="#2A8C47" stroke-width="1.4" opacity="1.00"/>
+<text x="337.0" y="135.0" text-anchor="start" font-size="12" fill="currentColor">panel, lit</text>
+<circle cx="260.0" cy="200.0" r="27.8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+<circle cx="260.0" cy="200.0" r="15.2" fill="var(--card)" stroke="currentColor" stroke-width="1.4"/>
+<text x="260.0" y="204.0" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<path d="M260.0 356.4 L217.0 135.1 L303.0 135.1 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="250.0" y="349.4" width="20.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="250.0" y="367.4" width="20.0" height="10.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="260.0" y="396.4" text-anchor="middle" font-size="12" fill="currentColor">main camera, cam A above it</text>
+<path d="M375.0 181.6 L225.3 171.8 L266.6 77.9 Z" fill="#FFDB8C" opacity="0.33"/>
+<rect x="366.0" y="172.6" width="18.0" height="18.0" rx="2" fill="#FFDB8C" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<line x1="352.1" y1="137.3" x2="353.3" y2="169.3" stroke="currentColor" stroke-width="4.0" stroke-linecap="round"/>
+<path d="M145.0 181.6 L253.4 77.9 L294.7 171.8 Z" fill="#FFDB8C" opacity="0.33"/>
+<rect x="136.0" y="172.6" width="18.0" height="18.0" rx="2" fill="#FFDB8C" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<line x1="167.0" y1="137.3" x2="167.5" y2="169.3" stroke="currentColor" stroke-width="4.0" stroke-linecap="round"/>
+<text x="375.0" y="211.6" text-anchor="middle" font-size="12" fill="currentColor">lamp, 250 mm out</text>
+<text x="145.0" y="211.6" text-anchor="middle" font-size="12" fill="currentColor">flag on the inner side</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">for shape: light the panel, not the subject</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">a bright even panel keys a dark subject of any colour</text>
+<text x="12.0" y="62.0" text-anchor="start" font-size="12" fill="currentColor">the camera sees no direct beam; the subject stays in shadow</text>
+</svg><svg viewBox="0 0 520 330" role="img" aria-label="Side view for silhouettes: lamps at panel mid-height, in the plane between subject and panel" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<line x1="142.2" y1="262.0" x2="197.8" y2="262.0" stroke="currentColor" stroke-width="3.0" stroke-linecap="round"/>
+<rect x="159.0" y="222.6" width="22.1" height="39.4" rx="2" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="154.8" y="178.9" width="30.4" height="43.7" rx="4" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="170.0" y="204.8" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<line x1="101.0" y1="298.8" x2="101.0" y2="96.4" stroke="#2A8C47" stroke-width="5.0" stroke-linecap="round"/>
+<text x="95.0" y="197.6" text-anchor="end" font-size="12" fill="currentColor">panel</text>
+<path d="M326.4 200.8 L103.8 236.1 L103.8 165.6 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="315.4" y="193.8" width="22.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="341.4" y="204.8" text-anchor="start" font-size="12" fill="currentColor">main</text>
+<path d="M317.2 79.5 L146.5 272.3 L95.3 210.1 Z" fill="#59B3F2" opacity="0.14"/>
+<rect x="306.2" y="72.5" width="22.0" height="14.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="302.2" y="83.5" text-anchor="end" font-size="12" fill="currentColor">cam A, 39.5&#176;</text>
+<path d="M151.6 188.4 L109.5 223.8 L109.5 153.0 Z" fill="#FFDB8C" opacity="0.33"/>
+<rect x="142.6" y="179.4" width="18.0" height="18.0" rx="2" fill="#FFDB8C" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="165.6" y="176.4" text-anchor="start" font-size="12" fill="currentColor">lamps at panel mid-height, 160 mm</text>
+<text x="109.0" y="302.8" text-anchor="start" font-size="12" fill="currentColor">panel lowered to &#8722;80 mm for cam A</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">for shape, from the side</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">elevation is irrelevant to a silhouette; evenness is everything</text>
+</svg></div>
+    <p class="col">Light the panel and leave the subject dark. Two lamps beside the panel, 250 mm out from
+    the axis and 40 mm in front of the panel plane, aimed across it at its centre, with a flag on each
+    inner side so nothing reaches the subject directly. The subject is then a dark shape against an
+    even green field whatever colour it is, which is what the backlit run proved: the lamps-off,
+    panel-lit capture scored 0.9601, the best to date. Elevation does not matter here, so the lamps
+    sit at the panel&rsquo;s mid-height. Cam A still needs the panel to reach &minus;61 mm; nothing
+    about lighting changes that.</p>
+  </div>
+
+  <div class="stack-s">
+    <div class="label">2. For colour</div>
+    <div class="two sketches"><svg viewBox="0 0 520 430" role="img" aria-label="Plan for colour: two diffused lamps at forty-five degrees either side, each with a flag that stops its beam short of the panel" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<path d="M383.6 323.6 L16.6 167.8 L317.5 167.8 Z" fill="#FFDB8C" opacity="0.33"/>
+<line x1="334.8" y1="372.4" x2="432.4" y2="274.8" stroke="#FFDB8C" stroke-width="7.0" stroke-linecap="round"/>
+<line x1="334.8" y1="372.4" x2="432.4" y2="274.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+<line x1="352.5" y1="323.6" x2="383.6" y2="292.5" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-dasharray="4 3"/>
+<line x1="345.6" y1="295.3" x2="346.9" y2="323.3" stroke="currentColor" stroke-width="4.0" stroke-linecap="round"/>
+<path d="M136.4 323.6 L202.5 167.8 L503.4 167.8 Z" fill="#FFDB8C" opacity="0.33"/>
+<line x1="87.6" y1="274.8" x2="185.2" y2="372.4" stroke="#FFDB8C" stroke-width="7.0" stroke-linecap="round"/>
+<line x1="87.6" y1="274.8" x2="185.2" y2="372.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+<line x1="136.4" y1="292.5" x2="167.5" y2="323.6" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-dasharray="4 3"/>
+<line x1="173.7" y1="295.3" x2="173.8" y2="323.3" stroke="currentColor" stroke-width="4.0" stroke-linecap="round"/>
+<rect x="191.0" y="128.5" width="138.0" height="5.0" rx="1" fill="#2A8C47" stroke="#2A8C47" stroke-width="1.4" opacity="1.00"/>
+<text x="337.0" y="135.0" text-anchor="start" font-size="12" fill="currentColor">panel, dark</text>
+<circle cx="260.0" cy="200.0" r="27.8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+<circle cx="260.0" cy="200.0" r="15.2" fill="var(--card)" stroke="currentColor" stroke-width="1.4"/>
+<text x="260.0" y="204.0" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<path d="M260.0 356.4 L217.0 135.1 L303.0 135.1 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="250.0" y="349.4" width="20.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="250.0" y="367.4" width="20.0" height="10.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="260.0" y="396.4" text-anchor="middle" font-size="12" fill="currentColor">main camera, cam A above it</text>
+<text x="260.0" y="420.0" text-anchor="middle" font-size="12" fill="currentColor">both lamps 45&#176; off the axis, 380 mm out, equal brightness</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">for colour: soft, even, and off the panel</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">a diffuser on each lamp; a flag stops the beam before the panel</text>
+<text x="12.0" y="62.0" text-anchor="start" font-size="12" fill="currentColor">a lamp at 45&#176; mirrors to &#8722;45&#176;: clear of both lenses</text>
+</svg><svg viewBox="0 0 520 300" role="img" aria-label="Side view for colour: both lamps at about twenty-five degrees, well above the main camera and well below cam A" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<line x1="142.2" y1="262.0" x2="197.8" y2="262.0" stroke="currentColor" stroke-width="3.0" stroke-linecap="round"/>
+<rect x="159.0" y="222.6" width="22.1" height="39.4" rx="2" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="154.8" y="178.9" width="30.4" height="43.7" rx="4" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="170.0" y="204.8" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<line x1="101.0" y1="280.4" x2="101.0" y2="96.4" stroke="#2A8C47" stroke-width="5.0" stroke-linecap="round"/>
+<text x="95.0" y="188.4" text-anchor="end" font-size="12" fill="currentColor">panel</text>
+<path d="M326.4 200.8 L103.8 236.1 L103.8 165.6 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="315.4" y="193.8" width="22.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="341.4" y="204.8" text-anchor="start" font-size="12" fill="currentColor">main</text>
+<path d="M317.2 79.5 L146.5 272.3 L95.3 210.1 Z" fill="#59B3F2" opacity="0.14"/>
+<rect x="306.2" y="72.5" width="22.0" height="14.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="302.2" y="83.5" text-anchor="end" font-size="12" fill="currentColor">cam A, 39.5&#176;</text>
+<path d="M293.6 119.3 L192.0 246.6 L136.6 162.6 Z" fill="#FFDB8C" opacity="0.33"/>
+<rect x="282.6" y="108.3" width="22.0" height="22.0" rx="2" fill="#FFDB8C" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="309.6" y="123.3" text-anchor="start" font-size="12" fill="currentColor">25&#176;, both lamps</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">for colour, from the side</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">25&#176; models the form and still lights under a brim</text>
+<text x="12.0" y="62.0" text-anchor="start" font-size="12" fill="currentColor">equal heights and brightness, or the bake inherits a gradient</text>
+</svg></div>
+    <p class="col">Soft, equal, and kept off the panel. Both bars at 45&deg; either side of the camera
+    axis, 380 mm out, 25&deg; up, each behind a diffuser, each with a flag that stops the beam short of
+    the panel. The two must match in brightness, because the bake takes a median across views and a
+    left-right imbalance turns into a gradient around the model. The reason for the flags is measured:
+    the best colour this project has produced came from soft room light with the panel barely lit, and
+    the worst from a lamp that lit the panel and the subject together. If the flags are not practical,
+    moving the panel back to 300 mm cuts its brightness to a quarter for the same lamps.</p>
+  </div>
+
+  <div class="stack-s">
+    <div class="label">3. For relief</div>
+    <div class="two sketches"><svg viewBox="0 0 520 430" role="img" aria-label="Plan for relief: a low lamp fifty degrees right, a high lamp fifty degrees left, small sources far from the subject" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<path d="M471.4 377.4 L188.6 207.4 L254.9 128.4 Z" fill="#FFDB8C" opacity="0.33"/>
+<rect x="462.4" y="368.4" width="18.0" height="18.0" rx="2" fill="#FFDB8C" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<path d="M48.6 377.4 L265.1 128.4 L331.4 207.4 Z" fill="#FABF66" opacity="0.33"/>
+<rect x="39.6" y="368.4" width="18.0" height="18.0" rx="2" fill="#FABF66" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="191.0" y="128.5" width="138.0" height="5.0" rx="1" fill="#2A8C47" stroke="#2A8C47" stroke-width="1.4" opacity="1.00"/>
+<text x="337.0" y="135.0" text-anchor="start" font-size="12" fill="currentColor">panel, dark</text>
+<circle cx="260.0" cy="200.0" r="27.8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+<circle cx="260.0" cy="200.0" r="15.2" fill="var(--card)" stroke="currentColor" stroke-width="1.4"/>
+<text x="260.0" y="204.0" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<path d="M260.0 356.4 L217.0 135.1 L303.0 135.1 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="250.0" y="349.4" width="20.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="250.0" y="367.4" width="20.0" height="10.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="260.0" y="396.4" text-anchor="middle" font-size="12" fill="currentColor">main camera, cam A above it</text>
+<text x="260.0" y="420.0" text-anchor="middle" font-size="12" fill="currentColor">50&#176; either side, 600 mm out, bars masked to a 50 mm window</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">for relief: two directions as different as the frame allows</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">the lamps must differ in height and in azimuth</text>
+<text x="12.0" y="62.0" text-anchor="start" font-size="12" fill="currentColor">small and far: a bar at 380 mm is a 43&#176; smear, not a direction</text>
+</svg><svg viewBox="0 0 520 340" role="img" aria-label="Side view for relief: lamp elevations of ten and fifty degrees, 600 mm from the subject" style="width:100%;height:auto;display:block;font-family:var(--sans);font-size:13px">
+<line x1="94.3" y1="300.0" x2="125.7" y2="300.0" stroke="currentColor" stroke-width="3.0" stroke-linecap="round"/>
+<rect x="103.8" y="277.7" width="12.5" height="22.3" rx="2" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<rect x="101.4" y="253.0" width="17.2" height="24.7" rx="4" fill="var(--card)" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="110.0" y="269.4" text-anchor="middle" font-size="11" fill="currentColor">subject</text>
+<line x1="71.0" y1="310.4" x2="71.0" y2="206.4" stroke="#2A8C47" stroke-width="5.0" stroke-linecap="round"/>
+<text x="65.0" y="258.4" text-anchor="end" font-size="12" fill="currentColor">panel</text>
+<path d="M198.4 265.4 L72.6 285.3 L72.6 245.5 Z" fill="#F2B840" opacity="0.14"/>
+<rect x="187.4" y="258.4" width="22.0" height="14.0" rx="2" fill="#F2B840" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="213.4" y="269.4" text-anchor="start" font-size="12" fill="currentColor">main</text>
+<path d="M193.2 196.8 L96.7 305.8 L67.8 270.7 Z" fill="#59B3F2" opacity="0.14"/>
+<rect x="182.2" y="189.8" width="22.0" height="14.0" rx="2" fill="#59B3F2" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="178.2" y="200.8" text-anchor="end" font-size="12" fill="currentColor">cam A, 39.5&#176;</text>
+<path d="M210.3 237.9 L114.7 300.8 L96.0 232.6 Z" fill="#FFDB8C" opacity="0.33"/>
+<rect x="204.3" y="231.9" width="12.0" height="12.0" rx="2" fill="#FFDB8C" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="226.3" y="241.9" text-anchor="start" font-size="12" fill="currentColor">low lamp, 10&#176;, 50&#176; right of the camera</text>
+<path d="M210.3 79.5 L168.6 308.1 L42.2 239.9 Z" fill="#FABF66" opacity="0.33"/>
+<rect x="204.3" y="73.5" width="12.0" height="12.0" rx="2" fill="#FABF66" stroke="currentColor" stroke-width="1.4" opacity="1.00"/>
+<text x="226.3" y="83.5" text-anchor="start" font-size="12" fill="currentColor">high lamp, 50&#176;, 50&#176; left of the camera</text>
+<text x="12.0" y="24.0" text-anchor="start" font-size="13" fill="currentColor" font-weight="700">for relief, from the side</text>
+<text x="12.0" y="44.0" text-anchor="start" font-size="12" fill="currentColor">40&#176; apart in height; 4&#176; and 36&#176; already solved</text>
+<text x="12.0" y="62.0" text-anchor="start" font-size="12" fill="currentColor">a third lamp on the spare relay channel: front, 60&#176; up</text>
+</svg></div>
+    <p class="col">Photometric stereo wants directions that differ as much as possible and sources that
+    behave like points. Put the low lamp at 50&deg; right and 10&deg; up, the high lamp at 50&deg; left
+    and 50&deg; up, both 600 mm from the subject, and mask each bar to a window about 50 mm wide. The
+    present 4&deg; and 36&deg; solved to a smallest singular value of 1.394, so 40&deg; of separation in
+    height is already known to be enough; the azimuth spread and the distance are what the present
+    layout lacks. The relay has two spare channels: a third lamp from the front at 60&deg; up makes the
+    solve well conditioned in every direction, and the ambient frame at each stop should stay, with the
+    room lamp off.</p>
+  </div>
+
+  <div class="scroll"><table>
+    <thead><tr><th>Pass</th><th>Lamps</th><th>Panel</th><th>Camera that benefits</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Shape</td><td>Two, beside the panel, flagged off the subject</td><td class="best">Lit, even</td><td>Main and cam A: clean keys at every stop</td></tr>
+      <tr><td class="name">Colour</td><td>Two, 45&deg; either side, 25&deg; up, diffused, flagged off the panel</td><td>Dark</td><td>Main: no green bounce, no clipping, no glare</td></tr>
+      <tr><td class="name">Relief</td><td>Two or three, 50&deg; apart in azimuth, 10&deg; and 50&deg; up, far and small</td><td>Dark</td><td>Main: a well conditioned normal solve</td></tr>
+    </tbody>
+  </table></div>
+  <p class="col" style="font-size:.92rem;color:var(--ink-2)">Three lamp positions means moving the bars
+  between passes, or three pairs of bars on the relay&rsquo;s channels. The second is the one worth
+  building: every position is fixed to the frame, so nothing has to be re-solved between runs. The
+  room&rsquo;s own lamp sits behind the panel and should be off for every pass; between two runs it
+  alone moved the unlit frames from mean brightness 36.0 to 1.3.</p>
+</div>
+<!-- lighting-recommendations:end -->
 
   <div class="stack-s">
     <div class="label">The upgrade list, ranked by what the rig has been measured to get wrong</div>
